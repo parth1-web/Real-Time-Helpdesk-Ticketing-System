@@ -74,19 +74,23 @@
 [data-theme="dark"] .text-secondary { color: var(--text-secondary) !important; }
 [data-theme="dark"] .btn-outline-secondary { color: var(--text-primary); border-color: var(--border); }
 :root {
-  --sidebar-bg: #ffffff;
-  --sidebar-text: #5c665c;
+  --sidebar-bg: linear-gradient(180deg, #f2f7f0 0%, #e6efe4 100%);
+  --sidebar-text: #3f4a3e;
   --sidebar-active: #ffffff;
-  --sidebar-muted: #9aa39a;
-  --sidebar-border: transparent;
+  --sidebar-muted: #7d8a7b;
+  --sidebar-border: #d5e0d2;
+  --sidebar-hover: rgba(21, 128, 61, 0.08);
+  --sidebar-icon: #2f6b45;
   --accent-dark: #123524;
   --accent-mid: #1d6a44;
   --accent-soft: #cfe6d8;
 }
 [data-theme="dark"] {
-  --sidebar-bg: #101711;
-  --sidebar-text: #a8b4a6;
+  --sidebar-bg: linear-gradient(180deg, #12241a 0%, #0c1811 100%);
+  --sidebar-text: #b9c9b6;
   --sidebar-active: #ffffff;
-  --sidebar-muted: #64748f;
-  --sidebar-border: #1e2a20;
+  --sidebar-muted: #6f8569;
+  --sidebar-border: #1d2f22;
+  --sidebar-hover: rgba(134, 239, 172, 0.08);
+  --sidebar-icon: #86efac;
 }

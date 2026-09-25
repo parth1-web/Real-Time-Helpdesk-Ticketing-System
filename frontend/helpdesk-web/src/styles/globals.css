@@ -19,11 +19,13 @@ h1, h2 { letter-spacing: -0.01em; }
 .brand-name { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.01em; color: var(--text-primary); }
 .workspace-card { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 7px 10px; color: var(--text-secondary); background: var(--surface-secondary); }
 .workspace-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex: 0 0 8px; }
-.side-section { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sidebar-muted); padding: 6px 10px 0; }
-.side-link { border-radius: 999px; color: var(--sidebar-text); font-weight: 500; padding: 8px 14px; gap: 12px; }
-.side-link:hover { background: var(--surface-secondary); color: var(--text-primary); }
-.side-link.active { background: var(--accent-dark); color: #fff !important; font-weight: 650; }
-.side-link.active svg { color: #fff; }
+.side-section { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sidebar-muted); padding: 6px 10px 0; font-weight: 700; }
+.side-link { display: flex; align-items: center; border-radius: 999px; color: var(--sidebar-text); font-weight: 500; padding: 8px 14px; gap: 12px; }
+.side-link svg { color: var(--sidebar-icon); flex: 0 0 auto; }
+.side-link:hover { background: var(--sidebar-hover); color: var(--text-primary); transform: translateX(2px); }
+[data-theme="dark"] .side-link:hover { color: var(--sidebar-active); }
+.side-link.active { background: linear-gradient(135deg, #1d6a44, #0e2f1e); color: #fff !important; font-weight: 650; box-shadow: 0 4px 12px rgba(18, 53, 36, 0.35); }
+.side-link.active svg { color: #bbf7d0; }
 .side-user { border-top: 1px solid var(--border); padding-top: 10px; display: flex; align-items: center; gap: 10px; color: var(--text-primary); }
 .collapse-btn { border: 1px solid var(--border); background: transparent; color: var(--text-secondary); border-radius: 999px; padding: 6px; font-size: 0.8rem; }
 .collapse-btn:hover { background: var(--surface-secondary); color: var(--text-primary); }
