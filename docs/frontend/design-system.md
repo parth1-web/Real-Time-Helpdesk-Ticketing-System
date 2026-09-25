@@ -1,13 +1,13 @@
-# Design System — Helpdesk
+# Design System — Helpdesk (polished)
 
-SaaS tokens in `src/styles/theme.css` (light/dark via `data-theme`, persisted in Zustand+localStorage).
+SaaS tokens in `src/styles/theme.css` + `animations.css` + `responsive.css` + `components.css` + `globals.css`
+(light default, dedicated dark, persisted in Zustand+localStorage, `prefers-reduced-motion` respected).
 Bootstrap 5 + React-Bootstrap remain the only UI framework. Lucide icons only.
 
-- Colors: `--primary #4f46e5`, success/warning/danger/info + priority/status/SLA semantic badges with icon+text (never color alone).
-- Type: Inter stack; page title bold, secondary muted, metadata small.
-- Spacing: Bootstrap `p-/m-/gap-` utilities.
-- Components: `PageHeader`, `StatCard` (`.metric-card` hover lift), `StatusBadge/PriorityBadge/SlaBadge`, `UserAvatar` initials, `EmptyState/ErrorState/SkeletonCards`, Bootstrap Modal/Toast/Table/Pagination.
-- Responsive: sidebar → offcanvas <992px; `desktop-table` ↔ `mobile-cards`; charts stack 1-col on mobile.
-- A11y: labels + `aria-invalid/describedby`, `aria-label` on icon buttons, `:focus-visible`, keyboard `Ctrl+K` search, `Ctrl+Enter` send, `Esc` closes offcanvas.
-- Dark: surfaces `#1e293b`, text `#f1f5f9`, charts/tooltips adapt via `data-theme`.
-- Feedback: every fetch has loading/skeleton, error+retry, empty+CTA; mutations show sending→toast.
+- Colors: `--primary #4f46e5` (+ `--primary-hover`), restrained surfaces; priority/status/SLA badges with icon+text (never color alone).
+- Type/spacing: Inter stack, page-title hierarchy, Bootstrap utilities, content max 1600 / forms 800.
+- Shell: sectioned sidebar (Overview/Support/Management) with icons, active accent bar, badges, collapse + offcanvas; light topbar with breadcrumb, search + Ctrl+K command palette, Live dot, notification 9+ badge, profile menu with role; offline bar.
+- Components: `PageHeader`, `StatCard` (icon+trend+hover lift), `TicketCard` (number/subject/customer/priority/status/SLA/progress/updated/arrow), `FilterChip`, `ConfirmModal`, `SlaProgress`, timeline, skeleton/avatar/message/table variants, toasts with icons.
+- Tickets: sticky table headers, urgent left-accent, hover actions, mobile cards, `Showing 1–20 of N` + mobile pager; detail 2-col with role-labeled bubbles, internal-note amber treatment, msg-enter/flash on SignalR, sticky composer with count + Ctrl+Enter, copy-number with Copied!, activity timeline.
+- Feedback/notifications: lightweight 1–5 + toast; unread tinted rows, mark read/all, badge invalidation.
+- A11y/responsive: labels + `aria-*`, visible focus, keyboard shortcuts, 1920→360 audits, charts stack + dark-aware tooltips.
