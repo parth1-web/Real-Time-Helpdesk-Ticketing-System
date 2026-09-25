@@ -40,8 +40,8 @@ export function LoginPage() {
               nav('/dashboard');
             } catch { setErr('Invalid email or password.'); }
           })}>
-            <Form.Group className="mb-2"><Form.Label>Email</Form.Label><Form.Control {...register('email')} isInvalid={!!errors.email} aria-invalid={!!errors.email} /><Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback></Form.Group>
-            <Form.Group className="mb-3"><Form.Label>Password</Form.Label><Form.Control type="password" {...register('password')} isInvalid={!!errors.password} /><Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback></Form.Group>
+            <Form.Group className="mb-2"><Form.Label>Email</Form.Label><Form.Control {...register('email')} isInvalid={!!errors.email} aria-invalid={!!errors.email} autoComplete="email" placeholder="you@example.com" /><Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback><Form.Text>We&apos;ll never share your email.</Form.Text></Form.Group>
+            <Form.Group className="mb-3"><Form.Label>Password</Form.Label><Form.Control type="password" {...register('password')} isInvalid={!!errors.password} autoComplete="current-password" placeholder="••••••••" /><Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback></Form.Group>
             <Button className="w-100" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Signing in...' : 'Login'}</Button>
           </Form>
           <p className="mt-3 mb-0">No account? <Link to="/register">Register</Link></p>

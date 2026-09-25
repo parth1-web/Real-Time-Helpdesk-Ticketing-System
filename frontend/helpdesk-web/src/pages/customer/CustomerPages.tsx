@@ -73,9 +73,10 @@ export function TicketNewPage() {
   const { user } = useAuthStore();
   return (
     <div style={{ maxWidth: 720 }}>
-      <PageHeader title="Create Support Ticket" />
-      {err && <div className="alert alert-danger">{err}</div>}
+      <PageHeader title="Create Support Ticket" desc="Simple steps — admin fields stay hidden." />
+      {err && <div className="alert alert-danger" role="alert">{err}</div>}
       <Card className="p-3">
+        <h6>1 · Ticket information</h6>
         <Form onSubmit={async (e) => {
           e.preventDefault(); setErr('');
           if (!form.subject || !form.description) { setErr('Subject and description are required.'); return; }
@@ -84,11 +85,14 @@ export function TicketNewPage() {
             nav(`/tickets/${data.id}`);
           } catch { setErr('Unable to create ticket. Check organization and try again.'); }
         }}>
-          <Form.Group className="mb-2"><Form.Label>Subject ({form.subject.length}/200)</Form.Label><Form.Control value={form.subject} maxLength={200} onChange={(e) => setForm({ ...form, subject: e.target.value })} /></Form.Group>
+          <Form.Group className="mb-2"><Form.Label>Subject ({form.subject.length}/200)</Form.Label><Form.Control value={form.subject} maxLength={200} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="Unable to access my account" aria-describedby="subject-help" /><Form.Text id="subject-help">We&apos;ll use this subject to identify your request.</Form.Text></Form.Group>
           <Row><Col><Form.Group className="mb-2"><Form.Label>Category</Form.Label><Form.Select value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}><option value="">Select category</option>{(cats ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</Form.Select></Form.Group></Col>
             <Col><Form.Group className="mb-2"><Form.Label>Priority</Form.Label><Form.Select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}><option>Low</option><option>Medium</option><option>High</option><option>Urgent</option></Form.Select></Form.Group></Col></Row>
-          <Form.Group className="mb-2"><Form.Label>Description ({form.description.length}/5000)</Form.Label><Form.Control as="textarea" rows={5} value={form.description} maxLength={5000} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Form.Group>
-          <div className="d-flex gap-2"><Button variant="outline-secondary" onClick={() => nav(-1)}>Cancel</Button><Button type="submit">Submit Ticket</Button></div>
+          <h6 className="mt-3">2 · Description</h6>
+          <Form.Group className="mb-2"><Form.Label>Description ({form.description.length}/5000)</Form.Label><Form.Control as="textarea" rows={5} value={form.description} maxLength={5000} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Describe what happened, steps to reproduce…" /></Form.Group>
+          <h6 className="mt-3">3 · Attachments</h6>
+          <Form.Text>PNG, JPG, PDF up to 10 MB. Validation also runs on the server.</Form.Text>
+          <div className="d-flex gap-2 mt-2"><Button variant="outline-secondary" onClick={() => nav(-1)}>Cancel</Button><Button type="submit">4 · Submit Ticket</Button></div>
         </Form>
       </Card>
     </div>
