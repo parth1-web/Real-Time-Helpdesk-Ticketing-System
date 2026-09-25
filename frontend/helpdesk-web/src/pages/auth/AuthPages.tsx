@@ -1,14 +1,13 @@
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Card, Form, Button, Alert } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldErrors, type FieldValues, type Path, type UseFormRegister } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { LifeBuoy, Zap, ShieldCheck, BarChart3, Eye, EyeOff, Mail, Lock, User, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { LifeBuoy, Zap, ShieldCheck, BarChart3, Eye, EyeOff, Mail, Lock, User, Loader2, type LucideIcon } from 'lucide-react';
 import { authApi } from '../../api/helpdeskApi';
 import { useAuthStore } from '../../store/useAuthStore';
 import { getToken } from '../../store/session';
-import * as React from 'react';
 
 const loginSchema = z.object({ email: z.string().email('Please enter a valid email address.'), password: z.string().min(1, 'Password is required.'), remember: z.boolean().optional() });
 const registerSchema = z.object({
@@ -51,129 +50,43 @@ function StatusPill({ status }: { status: 'checking' | 'live' | 'down' }) {
   return <span className="live-pill connecting" role="status">○ Connecting…</span>;
 }
 
-function AnimatedIcon({ icon: Icon, delay = 0, className = '' }: { icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>; delay?: number; className?: string }) {
-  return (
-    <div className={`auth-feature-icon-wrapper ${className}`} style={{ animationDelay: `${delay}ms` }}>
-      <Icon width={24} height={24} />
-    </div>
-  );
+function AnimatedIcon({ icon: Icon, delay = 0 }: { icon: LucideIcon; delay?: number }) {
+  return <div className="auth-feature-icon-wrapper" style={{ animationDelay: `${delay}ms` }}><Icon size={24} /></div>;
 }
 
-function FeatureItem({ icon: Icon, title, description, delay = 0 }: { icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>; title: string; description: string; delay?: number }) {
-  return (
-    <div className="auth-feat" style={{ animationDelay: `${delay}ms` }}>
-      <AnimatedIcon icon={Icon} delay={delay} />
-      <div>
-        <strong>{title}</strong>
-        <span>{description}</span>
-      </div>
-    </div>
-  );
+function FeatureItem({ icon: Icon, title, description, delay = 0 }: { icon: LucideIcon; title: string; description: string; delay?: number }) {
+  return <div className="auth-feat" style={{ animationDelay: `${delay}ms` }}><AnimatedIcon icon={Icon} delay={delay} /><div><strong>{title}</strong><span>{description}</span></div></div>;
 }
 
 function StatItem({ label, value, delay = 0 }: { label: string; value: string | number; delay?: number }) {
-  return (
-    <div className="auth-stat" style={{ animationDelay: `${delay}ms` }}>
-      <b>{value}</b>
-      <small>{label}</small>
-    </div>
-  );
+  return <div className="auth-stat" style={{ animationDelay: `${delay}ms` }}><b>{value}</b><small>{label}</small></div>;
 }
 
 function Showcase() {
-  return (
-    <div className="auth-show">
-      <div className="auth-brand"><span className="brand-badge"><LifeBuoy width={20} height={20} /></span> HelpDesk</div>
-      <h1>Support that feels <span className="text-primary">instant</span>.</h1>
-      <p className="mb-0" style={{ opacity: 0.85 }}>Realtime conversations, SLA tracking and analytics — one workspace for customers, agents and admins.</p>
-      <div className="auth-feats">
-        <FeatureItem icon={Zap} title="Realtime tickets." description="Messages, assignment and status sync live." delay={100} />
-        <FeatureItem icon={ShieldCheck} title="SLA you can trust." description="At-risk and breach alerts, enforced server-side." delay={200} />
-        <FeatureItem icon={BarChart3} title="Command-center analytics." description="Volume, SLA compliance, CSAT." delay={300} />
-      </div>
-      <div className="auth-stats">
-        <StatItem label="SignalR sync" value="Live" delay={100} />
-        <StatItem label="Role workspaces" value="5" delay={200} />
-        <StatItem label="SLA monitor" value="24/7" delay={300} />
-      </div>
-    </div>
-  );
+  return <div className="auth-show"><div className="auth-brand"><span className="brand-badge"><LifeBuoy size={20} /></span> HelpDesk</div><h1>Support that feels <span className="text-primary">instant</span>.</h1><p className="mb-0" style={{ opacity: 0.85 }}>Realtime conversations, SLA tracking and analytics — one workspace for customers, agents and admins.</p><div className="auth-feats"><FeatureItem icon={Zap} title="Realtime tickets." description="Messages, assignment and status sync live." delay={100} /><FeatureItem icon={ShieldCheck} title="SLA you can trust." description="At-risk and breach alerts, enforced server-side." delay={200} /><FeatureItem icon={BarChart3} title="Command-center analytics." description="Volume, SLA compliance, CSAT." delay={300} /></div><div className="auth-stats"><StatItem label="SignalR sync" value="Live" delay={100} /><StatItem label="Role workspaces" value="5" delay={200} /><StatItem label="SLA monitor" value="24/7" delay={300} /></div></div>;
 }
 
-function InputWithIcon({ icon: Icon, children, className = '', ...props }: { icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>; children: React.ReactNode; className?: string; [key: string]: any }) {
-  return (
-    <div className={`input-with-icon ${className}`}>
-      <span className="input-icon"><Icon width={18} height={18} /></span>
-      {React.cloneElement(children as React.ReactElement, { ...props })}
-    </div>
-  );
+function InputWithIcon({ icon: Icon, children, className = '' }: { icon: LucideIcon; children: ReactNode; className?: string }) {
+  return <div className={`input-with-icon ${className}`}><span className="input-icon"><Icon size={18} /></span>{children}</div>;
 }
 
-function PasswordField({ register, errors, show, setShow, name, label, placeholder, autoComplete, icon: Icon }: { register: any; errors: any; show: boolean; setShow: (show: boolean) => void; name: string; label: string; placeholder: string; autoComplete: string; icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>> }) {
-  return (
-    <Form.Group className="mb-2" as={Fragment}>
-      <Form.Label>{label}</Form.Label>
-      <div className="pw-wrap input-with-icon">
-<span className="input-icon"><Icon width={18} height={18} /></span>
-        <Form.Control
-          type={show ? 'text' : 'password'}
-          {...register(name)}
-          isInvalid={!!errors[name]}
-          autoComplete={autoComplete}
-          placeholder={placeholder}
-        />
-        <button
-          type="button"
-          className="pw-toggle"
-          onClick={() => setShow(!show)}
-          aria-label={show ? 'Hide password' : 'Show password'}
-        >
-          {show ? <EyeOff width={16} height={16} /> : <Eye width={16} height={16} />}
-        </button>
-        <Form.Control.Feedback type="invalid">{errors[name]?.message}</Form.Control.Feedback>
-      </div>
-    </Form.Group>
-  );
+function errorMessage<T extends FieldValues>(errors: FieldErrors<T>, name: Path<T>) {
+  const message = errors[name]?.message;
+  return typeof message === 'string' ? message : undefined;
 }
 
-function FormField({ register, errors, name, label, placeholder, type = 'text', icon: Icon, autoComplete, children, ...props }: { register: any; errors: any; name: string; label: string; placeholder: string; type?: string; icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>; autoComplete: string; children?: React.ReactNode; [key: string]: any }) {
-  return (
-    <Form.Group className="mb-2" as={Fragment}>
-      <Form.Label>{label}</Form.Label>
-      <InputWithIcon icon={Icon} className={errors[name] ? 'has-error' : ''}>
-        <Form.Control
-          {...register(name)}
-          type={type}
-          isInvalid={!!errors[name]}
-          aria-invalid={!!errors[name]}
-          autoComplete={autoComplete}
-          placeholder={placeholder}
-          {...props}
-        />
-        <Form.Control.Feedback type="invalid">{errors[name]?.message}</Form.Control.Feedback>
-      </InputWithIcon>
-      {children}
-    </Form.Group>
-  );
+function PasswordField<T extends FieldValues>({ register, errors, show, setShow, name, label, placeholder, autoComplete, icon: Icon }: { register: UseFormRegister<T>; errors: FieldErrors<T>; show: boolean; setShow: (value: boolean) => void; name: Path<T>; label: string; placeholder: string; autoComplete: string; icon: LucideIcon }) {
+  const message = errorMessage(errors, name);
+  return <Form.Group className="mb-2"><Form.Label>{label}</Form.Label><div className="pw-wrap input-with-icon"><span className="input-icon"><Icon size={18} /></span><Form.Control type={show ? 'text' : 'password'} {...register(name)} isInvalid={!!message} autoComplete={autoComplete} placeholder={placeholder} /><button type="button" className="pw-toggle" onClick={() => setShow(!show)} aria-label={show ? 'Hide password' : 'Show password'}>{show ? <EyeOff size={16} /> : <Eye size={16} />}</button><Form.Control.Feedback type="invalid">{message}</Form.Control.Feedback></div></Form.Group>;
 }
 
-function AuthLayout({ children, title, subtitle, backend, actions }: { children: React.ReactNode; title: string; subtitle: string; backend: 'checking' | 'live' | 'down'; actions?: React.ReactNode }) {
-  return (
-    <div className="auth-wrap">
-      <Showcase />
-      <div className="auth-form-side">
-        <Card className="p-4 auth-card">
-          <div className="d-flex justify-content-between align-items-center mb-1">
-            <h2 className="mb-0">{title}</h2>
-            <StatusPill status={backend} />
-          </div>
-          <p className="text-secondary">{subtitle}</p>
-          {children}
-          {actions}
-        </Card>
-      </div>
-    </div>
-  );
+function FormField<T extends FieldValues>({ register, errors, name, label, placeholder, type = 'text', icon: Icon, autoComplete, children, ...props }: { register: UseFormRegister<T>; errors: FieldErrors<T>; name: Path<T>; label: string; placeholder: string; type?: string; icon: LucideIcon; autoComplete: string; children?: ReactNode; [key: string]: unknown }) {
+  const message = errorMessage(errors, name);
+  return <Form.Group className="mb-2"><Form.Label>{label}</Form.Label><InputWithIcon icon={Icon} className={message ? 'has-error' : ''}><Form.Control {...register(name)} type={type} isInvalid={!!message} aria-invalid={!!message} autoComplete={autoComplete} placeholder={placeholder} {...props} /><Form.Control.Feedback type="invalid">{message}</Form.Control.Feedback></InputWithIcon>{children}</Form.Group>;
+}
+
+function AuthLayout({ children, title, subtitle, backend, actions }: { children: ReactNode; title: string; subtitle: string; backend: 'checking' | 'live' | 'down'; actions?: ReactNode }) {
+  return <Card className="p-4 auth-card"><div className="d-flex justify-content-between align-items-center mb-1"><h2 className="mb-0">{title}</h2><StatusPill status={backend} /></div><p className="text-secondary">{subtitle}</p>{children}{actions}</Card>;
 }
 
 export function LoginPage() {
@@ -181,7 +94,6 @@ export function LoginPage() {
   const { setSession } = useAuthStore();
   const [err, setErr] = useState('');
   const [show, setShow] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const backend = useBackendStatus();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<z.infer<typeof loginSchema>>({ resolver: zodResolver(loginSchema), defaultValues: { remember: true } });
   if (getToken()) return <Navigate to="/dashboard" replace />;
@@ -199,19 +111,15 @@ export function LoginPage() {
         >
           {err && <Alert variant="danger" role="alert" className="mb-3">{err}</Alert>}
           <Form onSubmit={handleSubmit(async (v) => {
-            setErr('');
-            setFieldErrors({});
-            try {
-              const { data } = await authApi.login(v.email, v.password);
-              const me = await authApi.me().catch(() => null);
-              setSession(data.accessToken, data.refreshToken, { id: data.userId, email: data.email, fullName: data.fullName, role: me?.data?.role ?? 'Customer' }, v.remember ?? true);
-              nav('/dashboard');
-            } catch (e: any) {
-              const msg = e?.response?.data?.error || e?.message || 'Invalid email or password.';
-              if (msg.includes('email')) setFieldErrors({ email: msg });
-              else if (msg.includes('password')) setFieldErrors({ password: msg });
-              else setErr(msg);
-            }
+             setErr('');
+             try {
+               const { data } = await authApi.login(v.email, v.password);
+               const me = await authApi.me().catch(() => null);
+               setSession(data.accessToken, data.refreshToken, { id: data.userId, email: data.email, fullName: data.fullName, role: me?.data?.role ?? 'Customer' }, v.remember ?? true);
+               nav('/dashboard');
+             } catch {
+               setErr('Invalid email or password.');
+             }
           })}>
             <FormField
               register={register}
@@ -219,10 +127,9 @@ export function LoginPage() {
               name="email"
               label="Email"
               placeholder="you@example.com"
-              icon={Mail}
-              autoComplete="email"
-              error={fieldErrors.email}
-            />
+               icon={Mail}
+               autoComplete="email"
+             />
             <PasswordField
               register={register}
               errors={errors}
@@ -248,9 +155,8 @@ export function LoginPage() {
               )}
             </Button>
             {backend === 'down' && <Alert variant="warning" className="mt-2 py-2 small">Backend unreachable — start the API on :5000, then retry.</Alert>}
-          </Form>
-          <p className="mt-3 mb-0 text-secondary small">Protected by role-based access · JWT rotation</p>
-        </AuthLayout>
+           </Form>
+         </AuthLayout>
       </div>
     </div>
   );
@@ -359,9 +265,8 @@ export function RegisterPage() {
                 'Create account →'
               )}
             </Button>
-          </Form>
-          <p className="mt-3 mb-0">Have an account? <Link to="/login">Sign in</Link></p>
-        </AuthLayout>
+           </Form>
+         </AuthLayout>
       </div>
     </div>
   );
