@@ -1,6 +1,6 @@
 import { Badge, Card, Alert, Button, Spinner, Placeholder } from 'react-bootstrap';
 import { AlertTriangle, Inbox, LifeBuoy } from 'lucide-react';
-import type { SlaStatus, TicketPriority, TicketStatus } from '../types';
+import type { SlaStatus, TicketPriority, TicketStatus } from '../../types';
 
 export function StatusBadge({ s }: { s: TicketStatus | string }) {
   const map: Record<string, string> = { Open: 'primary', InProgress: 'info', WaitingForCustomer: 'warning', Resolved: 'success', Closed: 'secondary' };

@@ -18,14 +18,14 @@ export function CustomerDashboard() {
   if (isError) return <ErrorState message="We couldn't load your tickets." onRetry={() => refetch()} />;
   return (
     <div>
-      <PageHeader title={`Good morning, ${user?.fullName ?? 'there'} 👋`} desc="How can we help you today?" actions={<Button as={Link as never} to="/tickets/new"><Plus size={15} /> Create New Ticket</Button>} />
+      <PageHeader title={`Good morning, ${user?.fullName ?? 'there'} 👋`} desc="How can we help you today?" actions={<Link to="/tickets/new" className="btn btn-primary"><Plus size={15} /> Create New Ticket</Link>} />
       <Row className="g-3 mb-3">
         {[['Open Tickets', open], ['Total Tickets', data?.total ?? 0], ['Resolved', items.filter((t) => t.status === 'Resolved').length], ['Waiting', items.filter((t) => t.status === 'WaitingForCustomer').length]].map(([l, v]) => (
           <Col key={l as string} xs={12} sm={6} lg={3}><Card className="p-3 metric-card"><div className="fs-3 fw-bold">{v as number}</div><div className="text-secondary">{l as string}</div></Card></Col>
         ))}
       </Row>
       {items.length === 0
-        ? <EmptyState title="No support tickets yet." desc="Need help with something?" action={<Button as={Link as never} to="/tickets/new">Create Your First Ticket</Button>} />
+        ? <EmptyState title="No support tickets yet." desc="Need help with something?" action={<Link to="/tickets/new" className="btn btn-primary">Create Your First Ticket</Link>} />
         : <Card className="p-0 overflow-hidden"><Table hover responsive className="mb-0"><thead><tr><th>Ticket</th><th>Subject</th><th>Status</th><th>Priority</th><th>Updated</th></tr></thead><tbody>{items.slice(0, 8).map((t) => (<tr key={t.id}><td><Link to={`/tickets/${t.id}`}>{t.ticketNumber}</Link></td><td>{t.subject}</td><td><StatusBadge s={t.status} /></td><td><PriorityBadge p={t.priority} /></td><td>{new Date(t.createdAt).toLocaleString()}</td></tr>))}</tbody></Table></Card>}
     </div>
   );
@@ -41,7 +41,7 @@ export function TicketListPage() {
   if (isError) return <ErrorState message="Unable to load tickets." onRetry={() => refetch()} />;
   return (
     <div>
-      <PageHeader title="My Tickets" desc="Track and manage your support requests." actions={<Button as={Link as never} to="/tickets/new">+ New Ticket</Button>} />
+      <PageHeader title="My Tickets" desc="Track and manage your support requests." actions={<Link to="/tickets/new" className="btn btn-primary">+ New Ticket</Link>} />
       <Form className="d-flex gap-2 mb-3 flex-wrap">
         <Form.Control placeholder="Search tickets..." value={search} onChange={(e) => setParams({ search: e.target.value, status })} style={{ maxWidth: 280 }} aria-label="Search tickets" />
         <Form.Select value={status} onChange={(e) => setParams({ search, status: e.target.value })} style={{ maxWidth: 170 }} aria-label="Status filter">
@@ -50,7 +50,7 @@ export function TicketListPage() {
         {(search || status) && <Button variant="outline-secondary" onClick={() => setParams({})}>Clear Filters</Button>}
       </Form>
       {items.length === 0 ? <EmptyState title="No tickets found." desc="You don't have any tickets matching the current filters." action={<Button variant="outline-secondary" onClick={() => setParams({})}>Clear Filters</Button>} />
-        : <div>{items.map((t) => (<Card key={t.id} className="mb-2 p-3 ticket-card" as={Link as never} to={`/tickets/${t.id}`} style={{ textDecoration: 'none' }}><div className="d-flex gap-2 align-items-center"><strong>{t.ticketNumber}</strong><PriorityBadge p={t.priority} /><StatusBadge s={t.status} /><SlaBadge sla={t.slaStatus} dueAt={t.dueAt} /></div><div className="fw-semibold mt-1">{t.subject}</div><small className="text-secondary">Updated {new Date(t.createdAt).toLocaleString()}</small></Card>))}<p className="text-secondary">Showing 1–{items.length} of {data?.total ?? 0} tickets</p></div>}
+        : <div>{items.map((t) => (<Link key={t.id} to={`/tickets/${t.id}`} style={{ textDecoration: 'none', color: 'inherit' }}><Card className="mb-2 p-3 ticket-card"><div className="d-flex gap-2 align-items-center"><strong>{t.ticketNumber}</strong><PriorityBadge p={t.priority} /><StatusBadge s={t.status} /><SlaBadge sla={t.slaStatus} dueAt={t.dueAt} /></div><div className="fw-semibold mt-1">{t.subject}</div><small className="text-secondary">Updated {new Date(t.createdAt).toLocaleString()}</small></Card></Link>))}<p className="text-secondary">Showing 1–{items.length} of {data?.total ?? 0} tickets</p></div>}
     </div>
   );
 }
