@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { reportApi, departmentApi, categoryApi, slaApi } from '../../api/helpdeskApi';
-import { PageHeader, EmptyState, ErrorState, ConfirmModal } from '../../components/common/ui';
+import { PageHeader, EmptyState, ErrorState, ConfirmModal, StatCard } from '../../components/common/ui';
 import type { Department, TicketCategory, SlaPolicy } from '../../types';
 
 export function AdminDashboard() {
@@ -14,16 +14,19 @@ export function AdminDashboard() {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
   return (
     <div>
-      <PageHeader title="Command Center" desc="Enterprise support overview." />
-      <Row className="g-3 mb-3">
-        {[['Total Tickets', data?.total ?? 0], ['Open Tickets', data?.open ?? 0], ['Resolved', data?.resolved ?? 0], ['SLA Breached', data?.breached ?? 0], ['CSAT', Number(data?.avgRating ?? 0).toFixed(1)], ['SLA Compliance', '98%']].map(([l, v]) => (
-          <Col key={l as string} xs={12} sm={6} lg={2}><Card className="p-3 metric-card text-center"><div className="fs-4 fw-bold">{v as string | number}</div><div className="text-secondary">{l as string}</div></Card></Col>
-        ))}
+      <PageHeader title="Command Center" desc="Plan, prioritize, and run support with ease." actions={<span className="d-flex gap-2"><Link to="/admin/reports" className="btn btn-primary">View Reports</Link><Link to="/agent/tickets" className="btn btn-outline-secondary">Open Queue</Link></span>} />
+      <Row className="g-3 mb-3 stat-grid">
+        <Col xs={12} sm={6} lg={2}><StatCard dark label="Total Tickets" value={data?.total ?? 0} sub="All time" /></Col>
+        <Col xs={12} sm={6} lg={2}><StatCard label="Open Tickets" value={data?.open ?? 0} sub="Needs attention" /></Col>
+        <Col xs={12} sm={6} lg={2}><StatCard label="Resolved" value={data?.resolved ?? 0} sub="Done" /></Col>
+        <Col xs={12} sm={6} lg={2}><StatCard label="SLA Breached" value={data?.breached ?? 0} sub="Missed" /></Col>
+        <Col xs={12} sm={6} lg={2}><StatCard label="CSAT" value={Number(data?.avgRating ?? 0).toFixed(1)} sub="Avg rating" /></Col>
+        <Col xs={12} sm={6} lg={2}><StatCard label="Compliance" value="98%" sub="SLA met" /></Col>
       </Row>
       <Row className="g-3">
-        <Col xs={12} lg={4}><Card className="p-3"><h6>Tickets by Status</h6><small className="text-secondary">Live from /api/reports/summary</small>{byStatus.length === 0 ? <p className="text-secondary mt-2">No data yet.</p> : <BarChart width={280} height={200} data={byStatus}><XAxis dataKey="status" tick={{ fill: dark ? '#fff' : '#111' }} /><YAxis /><Tooltip contentStyle={{ background: dark ? '#1e293b' : '#fff' }} /><Bar dataKey="count" fill="#4f46e5" /></BarChart>}</Card></Col>
-        <Col xs={12} lg={4}><Card className="p-3"><h6>Tickets by Priority</h6><small className="text-secondary">Live from /api/reports/summary</small>{byPriority.length === 0 ? <p className="text-secondary mt-2">No data yet.</p> : <PieChart width={280} height={200}><Pie data={byPriority} dataKey="count" nameKey="priority" outerRadius={70}>{byPriority.map((_: unknown, i: number) => <Cell key={i} fill={['#6b7280', '#3b82f6', '#f59e0b', '#ef4444'][i % 4]} />)}</Pie><Tooltip /></PieChart>}</Card></Col>
-        <Col xs={12} lg={4}><Card className="p-3"><h6>Ticket Volume</h6><small className="text-secondary">Last 30 days</small><LineChart width={280} height={200} data={[{ d: 'Mon', v: 12 }, { d: 'Tue', v: 19 }, { d: 'Wed', v: 8 }]}><XAxis dataKey="d" /><YAxis /><Tooltip /><Line dataKey="v" stroke="#4f46e5" /></LineChart></Card></Col>
+        <Col xs={12} lg={4}><Card className="p-3 dash-card"><h6>Tickets by Status</h6><small className="text-secondary">Live from /api/reports/summary</small>{byStatus.length === 0 ? <p className="text-secondary mt-2">No data yet.</p> : <BarChart width={280} height={200} data={byStatus}><XAxis dataKey="status" tickLine={false} axisLine={false} tick={{ fill: dark ? '#fff' : '#111' }} /><YAxis /><Tooltip contentStyle={{ background: dark ? '#1e293b' : '#fff' }} /><Bar dataKey="count" fill="#1d6a44" radius={[8, 8, 8, 8]} /></BarChart>}</Card></Col>
+        <Col xs={12} lg={4}><Card className="p-3 dash-card"><h6>Tickets by Priority</h6><small className="text-secondary">Live from /api/reports/summary</small>{byPriority.length === 0 ? <p className="text-secondary mt-2">No data yet.</p> : <PieChart width={280} height={200}><Pie data={byPriority} dataKey="count" nameKey="priority" innerRadius={45} outerRadius={70} strokeWidth={0}>{byPriority.map((_: unknown, i: number) => <Cell key={i} fill={['#9fc3ae', '#57a773', '#1d6a44', '#0d2a1d'][i % 4]} />)}</Pie><Tooltip /></PieChart>}</Card></Col>
+        <Col xs={12} lg={4}><Card className="p-3 dash-card"><h6>Ticket Volume</h6><small className="text-secondary">Last 30 days</small><LineChart width={280} height={200} data={[{ d: 'Mon', v: 12 }, { d: 'Tue', v: 19 }, { d: 'Wed', v: 8 }]}><XAxis dataKey="d" tickLine={false} axisLine={false} /><YAxis /><Tooltip /><Line dataKey="v" stroke="#1d6a44" strokeWidth={2} dot={false} /></LineChart></Card></Col>
       </Row>
     </div>
   );

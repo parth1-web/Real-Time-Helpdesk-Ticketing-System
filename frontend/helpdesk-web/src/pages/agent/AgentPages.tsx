@@ -4,16 +4,21 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { ticketApi, reportApi, departmentApi } from '../../api/helpdeskApi';
-import { PageHeader, EmptyState, ErrorState, SkeletonCards } from '../../components/common/ui';
+import { PageHeader, EmptyState, ErrorState, SkeletonCards, StatCard } from '../../components/common/ui';
 import { FilterChip } from '../../components/common/ui';
 
 export function AgentDashboard() {
   const { data } = useQuery({ queryKey: ['summary'], queryFn: async () => (await reportApi.summary()).data, refetchInterval: 30000 });
-  const stats = [
-    ['My Open Tickets', data?.open ?? 0], ['Urgent', data?.byPriority?.find((x: { priority: string }) => x.priority === 'Urgent')?.count ?? 0],
-    ['SLA At Risk', 0], ['SLA Breached', data?.breached ?? 0], ['Resolved', data?.resolved ?? 0], ['Total', data?.total ?? 0],
-  ];
-  return (<div><PageHeader title="Good morning 👋" desc="Here's your support overview." /><Row className="g-3">{stats.map(([l, v]) => (<Col key={l as string} xs={12} sm={6} lg={2}><Card className="p-3 metric-card text-center"><div className="fs-3 fw-bold">{v as number}</div><div className="text-secondary">{l as string}</div></Card></Col>))}</Row></div>);
+  const urgent = data?.byPriority?.find((x: { priority: string }) => x.priority === 'Urgent')?.count ?? 0;
+  return (<div>
+    <PageHeader title="Good morning 👋" desc="Plan, prioritize, and resolve the queue with ease." actions={<span className="d-flex gap-2"><Link to="/agent/tickets" className="btn btn-primary">Open Queue</Link><Link to="/tickets/new" className="btn btn-outline-secondary">+ New Ticket</Link></span>} />
+    <Row className="g-3 stat-grid">
+      <Col xs={12} sm={6} lg={3}><StatCard dark label="My Open Tickets" value={data?.open ?? 0} sub="Needs attention first" /></Col>
+      <Col xs={12} sm={6} lg={3}><StatCard label="Urgent" value={urgent} sub="Highest priority" /></Col>
+      <Col xs={12} sm={6} lg={3}><StatCard label="SLA Breached" value={data?.breached ?? 0} sub="Missed deadlines" /></Col>
+      <Col xs={12} sm={6} lg={3}><StatCard label="Resolved" value={data?.resolved ?? 0} sub={`CSAT ${Number(data?.avgRating ?? 0).toFixed(1)}`} /></Col>
+    </Row>
+  </div>);
 }
 
 export function TicketQueuePage() {

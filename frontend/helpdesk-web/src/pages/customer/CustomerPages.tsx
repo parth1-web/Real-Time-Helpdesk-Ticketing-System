@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Card, Button, Row, Col, Form, Table, Badge, Modal, Dropdown, Alert, Spinner } from 'react-bootstrap';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { BarChart, Bar, XAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
 import { ticketApi, categoryApi, departmentApi, messageApi, feedbackApi, assignmentApi, attachmentApi, activityApi } from '../../api/helpdeskApi';
 import { ArrowRight, Headset } from 'lucide-react';
 import { PageHeader, EmptyState, ErrorState, SkeletonCards, SkeletonTable, SkeletonMessage, StatusBadge, PriorityBadge, SlaBadge, UserAvatar, StatCard, ConfirmModal } from '../../components/common/ui';
@@ -22,27 +22,44 @@ export function CustomerDashboard() {
   const waiting = items.filter((t) => t.status === 'WaitingForCustomer').length;
   const resolved = items.filter((t) => t.status === 'Resolved' || t.status === 'Closed').length;
   const atRisk = items.filter((t) => t.slaStatus === 'AtRisk' || t.slaStatus === 'Breached').length;
-  if (isLoading) return <div><PageHeader title={`${daypart}, ${user?.fullName ?? 'there'} 👋`} desc="How can we help you today?" /><SkeletonCards /></div>;
+  const watch = items.filter((t) => t.slaStatus === 'AtRisk' || t.slaStatus === 'Breached').slice(0, 4);
+  const queue = [...items].sort((a, b) => (b.priority === 'Urgent' ? 1 : 0) - (a.priority === 'Urgent' ? 1 : 0)).slice(0, 5);
+  const donePct = items.length ? Math.round((resolved / items.length) * 100) : 0;
+  const bars = ['Open', 'InProgress', 'WaitingForCustomer', 'Resolved', 'Closed'].map((s, i) => ({ s: s.slice(0, 4), v: items.filter((t) => t.status === s).length, f: i % 2 ? '#1d6a44' : '#9fc3ae' }));
+  if (isLoading) return <div><PageHeader title={`${daypart}, ${user?.fullName ?? 'there'} 👋`} desc="Plan, prioritize, and resolve your requests with ease." /><SkeletonCards /></div>;
   if (isError) return <ErrorState message="We couldn't load your tickets." onRetry={() => refetch()} />;
   return (
     <div>
-      <PageHeader title={`${daypart}, ${user?.fullName ?? 'there'} 👋`} desc="We're here to help. Everything below updates live." actions={<span className="d-flex gap-2 align-items-center"><span className="live-pill live"><span className="live-dot" /> Live</span><Link to="/tickets/new" className="btn btn-primary"><Plus size={15} /> Create New Ticket</Link></span>} />
+      <PageHeader title={`${daypart}, ${user?.fullName ?? 'there'} 👋`} desc="Plan, prioritize, and resolve your requests with ease." actions={<span className="d-flex gap-2 align-items-center"><Link to="/tickets/new" className="btn btn-primary">+ New Ticket</Link><Link to="/tickets" className="btn btn-outline-secondary">My Tickets</Link></span>} />
       <Row className="g-3 mb-3 stat-grid">
         <Col xs={12} sm={6} lg={3}><StatCard dark label="Open Tickets" value={open} sub="Needs attention first" /></Col>
         <Col xs={12} sm={6} lg={3}><StatCard label="Waiting for Reply" value={waiting} sub={waiting ? 'Agent is waiting on you' : 'Nothing pending'} /></Col>
         <Col xs={12} sm={6} lg={3}><StatCard label="Resolved" value={resolved} sub="Resolved + closed" /></Col>
         <Col xs={12} sm={6} lg={3}><StatCard label="SLA Attention" value={atRisk} sub={atRisk ? 'At risk or breached' : 'All clear'} /></Col>
       </Row>
-      <h6 className="mt-1 mb-2">Recent Tickets</h6>
-      {items.length === 0
-        ? <EmptyState title="No support tickets yet." desc="Need help with something?" action={<Link to="/tickets/new" className="btn btn-primary">Create Your First Ticket</Link>} />
-        : <><Card className="p-0 overflow-hidden"><Table hover responsive className="mb-0"><thead><tr><th>Ticket</th><th>Subject</th><th>Status</th><th>Priority</th><th>Updated</th></tr></thead><tbody>{items.slice(0, 8).map((t) => (<tr key={t.id}><td><Link to={`/tickets/${t.id}`}>{t.ticketNumber}</Link></td><td>{t.subject}</td><td><StatusBadge s={t.status} /></td><td><PriorityBadge p={t.priority} /></td><td>{new Date(t.createdAt).toLocaleString()}</td></tr>))}</tbody></Table></Card>
-          <h6 className="mt-3 mb-2">Quick Actions</h6>
+      <Row className="g-3 mb-3">
+        <Col xs={12} lg={4}><Card className="p-3 dash-card h-100"><div className="d-flex justify-content-between align-items-center"><h6 className="mb-0">Ticket Analytics</h6><span className="live-pill live"><span className="live-dot" /> Live</span></div><BarChart width={260} height={170} data={bars}><XAxis dataKey="s" tickLine={false} axisLine={false} /><Tooltip /><Bar dataKey="v" radius={[10, 10, 10, 10]}>{bars.map((b, i) => <Cell key={i} fill={b.f} />)}</Bar></BarChart></Card></Col>
+        <Col xs={12} lg={4}><Card className="p-3 dash-card h-100"><h6>SLA Watchlist</h6><small className="text-secondary">Due soon or breached</small>{watch.length === 0 ? <p className="text-secondary mt-2 mb-0">All clear — nothing near deadline.</p> : watch.map((t) => (<div key={t.id} className="mini-row"><SlaBadge sla={t.slaStatus} dueAt={t.dueAt} /><Link to={`/tickets/${t.id}`} className="text-truncate">{t.ticketNumber} · {t.subject}</Link></div>))}</Card></Col>
+        <Col xs={12} lg={4}><Card className="p-3 dash-card h-100"><div className="d-flex justify-content-between align-items-center"><h6 className="mb-0">Priority Queue</h6><Link to="/tickets/new" className="btn btn-sm btn-outline-secondary">+ New</Link></div>{queue.length === 0 ? <p className="text-secondary mt-2 mb-0">No tickets yet.</p> : queue.map((t) => (<div key={t.id} className="mini-row"><PriorityBadge p={t.priority} /><Link to={`/tickets/${t.id}`} className="text-truncate">{t.subject}</Link><small className="text-secondary ms-auto">{new Date(t.createdAt).toLocaleDateString()}</small></div>))}</Card></Col>
+      </Row>
+      <Row className="g-3">
+        <Col xs={12} lg={8}>
+          <h6 className="mt-1 mb-2">Recent Tickets</h6>
+          {items.length === 0
+            ? <EmptyState title="No support tickets yet." desc="Need help with something?" action={<Link to="/tickets/new" className="btn btn-primary">Create Your First Ticket</Link>} />
+            : <Card className="p-0 overflow-hidden dash-card"><Table hover responsive className="mb-0"><thead><tr><th>Ticket</th><th>Subject</th><th>Status</th><th>Priority</th><th>Updated</th></tr></thead><tbody>{items.slice(0, 8).map((t) => (<tr key={t.id}><td><Link to={`/tickets/${t.id}`}>{t.ticketNumber}</Link></td><td>{t.subject}</td><td><StatusBadge s={t.status} /></td><td><PriorityBadge p={t.priority} /></td><td>{new Date(t.createdAt).toLocaleString()}</td></tr>))}</tbody></Table></Card>}
+        </Col>
+        <Col xs={12} lg={4}>
+          <Card className="p-3 dash-card mb-3"><h6>Resolution Progress</h6><div className="d-flex align-items-center gap-2"><PieChart width={120} height={120}><Pie data={[{ v: resolved }, { v: Math.max(items.length - resolved, 0) }]} dataKey="v" innerRadius={38} outerRadius={55} startAngle={90} endAngle={-270} strokeWidth={0}>{[<Cell key="a" fill="#1d6a44" />, <Cell key="b" fill="#e2e6dd" />]}</Pie><Tooltip /></PieChart><div><div className="stat-num">{donePct}%</div><small className="text-secondary">Resolved</small></div></div></Card>
+          <Card className="p-3 health-card"><small style={{ opacity: 0.75 }}>Support health</small><div className="stat-num">{atRisk === 0 ? 'Excellent' : `${atRisk} need care`}</div><small style={{ opacity: 0.75 }}>{data?.total ?? 0} total · syncing live</small></Card>
+        </Col>
+      </Row>
+      <h6 className="mt-3 mb-2">Quick Actions</h6>
           <Row className="g-3">
             <Col xs={12} md={4}><Link to="/tickets/new" style={{ textDecoration: 'none' }}><Card className="p-3 interactive-card"><div className="fw-semibold">Create Ticket <ArrowRight size={14} /></div><small className="text-secondary">Get help from our support team.</small></Card></Link></Col>
             <Col xs={12} md={4}><Link to="/tickets" style={{ textDecoration: 'none' }}><Card className="p-3 interactive-card"><div className="fw-semibold">View Tickets <ArrowRight size={14} /></div><small className="text-secondary">Track your existing requests.</small></Card></Link></Col>
             <Col xs={12} md={4}><Card className="p-3"><div className="fw-semibold d-flex gap-2 align-items-center"><Headset size={15} /> Contact Support</div><small className="text-secondary">Need additional assistance?</small></Card></Col>
-          </Row></>}
+          </Row>
     </div>
   );
 }
