@@ -51,7 +51,7 @@ export function TicketListPage() {
   const [params, setParams] = useSearchParams();
   const search = params.get('search') ?? '';
   const status = params.get('status') ?? '';
-  const { data, isLoading, isError, refetch } = useQuery({ queryKey: ['tickets', search, status], queryFn: async () => (await ticketApi.list({ search: search || undefined, status: status || undefined, page: 1, pageSize: 20 })).data });
+  const { data, isLoading, isError, refetch } = useQuery({ queryKey: ['tickets', search, status], queryFn: async () => (await ticketApi.list({ search: search || undefined, status: status || undefined, page: 1, pageSize: 20 })).data, refetchInterval: 30000 });
   const items = data?.items ?? [];
   if (isLoading) return <SkeletonCards />;
   if (isError) return <ErrorState message="Unable to load tickets." onRetry={() => refetch()} />;
