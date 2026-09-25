@@ -14,19 +14,24 @@ import { useEffect } from 'react';
 
 export function CustomerDashboard() {
   const { user } = useAuthStore();
-  const { data, isLoading, isError, refetch } = useQuery({ queryKey: ['tickets', 'mine'], queryFn: async () => (await ticketApi.list({ page: 1, pageSize: 20 })).data });
+  const hour = new Date().getHours();
+  const daypart = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const { data, isLoading, isError, refetch } = useQuery({ queryKey: ['tickets', 'mine'], queryFn: async () => (await ticketApi.list({ page: 1, pageSize: 20 })).data, refetchInterval: 30000 });
   const items = data?.items ?? [];
-  const open = items.filter((t) => t.status === 'Open').length;
-  if (isLoading) return <div><PageHeader title={`Good morning, ${user?.fullName ?? 'there'} 👋`} desc="How can we help you today?" /><SkeletonCards /></div>;
+  const open = items.filter((t) => t.status === 'Open' || t.status === 'InProgress').length;
+  const waiting = items.filter((t) => t.status === 'WaitingForCustomer').length;
+  const resolved = items.filter((t) => t.status === 'Resolved' || t.status === 'Closed').length;
+  const atRisk = items.filter((t) => t.slaStatus === 'AtRisk' || t.slaStatus === 'Breached').length;
+  if (isLoading) return <div><PageHeader title={`${daypart}, ${user?.fullName ?? 'there'} 👋`} desc="How can we help you today?" /><SkeletonCards /></div>;
   if (isError) return <ErrorState message="We couldn't load your tickets." onRetry={() => refetch()} />;
   return (
     <div>
-      <PageHeader title={`Good morning, ${user?.fullName ?? 'there'} 👋`} desc="We're here to help." actions={<Link to="/tickets/new" className="btn btn-primary"><Plus size={15} /> Create New Ticket</Link>} />
+      <PageHeader title={`${daypart}, ${user?.fullName ?? 'there'} 👋`} desc="We're here to help. Everything below updates live." actions={<span className="d-flex gap-2 align-items-center"><span className="live-pill live"><span className="live-dot" /> Live</span><Link to="/tickets/new" className="btn btn-primary"><Plus size={15} /> Create New Ticket</Link></span>} />
       <Row className="g-3 mb-3 stat-grid">
-        <Col xs={12} sm={6} lg={3}><StatCard icon={<TicketIcon size={18} className="text-secondary" />} label="Open Tickets" value={open} trend="Needs attention first" /></Col>
-        <Col xs={12} sm={6} lg={3}><StatCard icon={<Clock size={18} className="text-secondary" />} label="Waiting for Reply" value={items.filter((t) => t.status === 'WaitingForCustomer').length} /></Col>
-        <Col xs={12} sm={6} lg={3}><StatCard icon={<CheckCircle2 size={18} className="text-secondary" />} label="Resolved" value={items.filter((t) => t.status === 'Resolved').length} /></Col>
-        <Col xs={12} sm={6} lg={3}><StatCard icon={<Inbox size={18} className="text-secondary" />} label="Total Tickets" value={data?.total ?? 0} /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard icon={<TicketIcon size={18} />} tone="blue" label="Open Tickets" value={open} trend="Needs attention first" /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard icon={<Clock size={18} />} tone="amber" label="Waiting for Reply" value={waiting} trend={waiting ? 'Agent is waiting on you' : 'Nothing pending'} /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard icon={<CheckCircle2 size={18} />} tone="green" label="Resolved" value={resolved} trend="Resolved + closed" /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard icon={<Inbox size={18} />} tone={atRisk ? 'red' : 'slate'} label="SLA Attention" value={atRisk} trend={atRisk ? 'At risk or breached' : 'All clear'} /></Col>
       </Row>
       <h6 className="mt-1 mb-2">Recent Tickets</h6>
       {items.length === 0

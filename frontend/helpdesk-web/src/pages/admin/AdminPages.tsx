@@ -8,7 +8,7 @@ import { PageHeader, EmptyState, ErrorState, ConfirmModal } from '../../componen
 import type { Department, TicketCategory, SlaPolicy } from '../../types';
 
 export function AdminDashboard() {
-  const { data } = useQuery({ queryKey: ['summary'], queryFn: async () => (await reportApi.summary()).data });
+  const { data } = useQuery({ queryKey: ['summary'], queryFn: async () => (await reportApi.summary()).data, refetchInterval: 30000 });
   const byStatus = data?.byStatus ?? [];
   const byPriority = data?.byPriority ?? [];
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';

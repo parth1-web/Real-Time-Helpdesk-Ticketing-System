@@ -8,7 +8,7 @@ import { PageHeader, EmptyState, ErrorState, SkeletonCards } from '../../compone
 import { FilterChip } from '../../components/common/ui';
 
 export function AgentDashboard() {
-  const { data } = useQuery({ queryKey: ['summary'], queryFn: async () => (await reportApi.summary()).data });
+  const { data } = useQuery({ queryKey: ['summary'], queryFn: async () => (await reportApi.summary()).data, refetchInterval: 30000 });
   const stats = [
     ['My Open Tickets', data?.open ?? 0], ['Urgent', data?.byPriority?.find((x: { priority: string }) => x.priority === 'Urgent')?.count ?? 0],
     ['SLA At Risk', 0], ['SLA Breached', data?.breached ?? 0], ['Resolved', data?.resolved ?? 0], ['Total', data?.total ?? 0],
@@ -19,7 +19,7 @@ export function AgentDashboard() {
 export function TicketQueuePage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
-  const { data, isLoading, isError, refetch } = useQuery({ queryKey: ['queue', search, status], queryFn: async () => (await ticketApi.list({ search: search || undefined, status: status || undefined, page: 1, pageSize: 20 })).data });
+  const { data, isLoading, isError, refetch } = useQuery({ queryKey: ['queue', search, status], queryFn: async () => (await ticketApi.list({ search: search || undefined, status: status || undefined, page: 1, pageSize: 20 })).data, refetchInterval: 30000 });
   const { data: depts } = useQuery({ queryKey: ['depts'], queryFn: async () => (await departmentApi.list()).data });
   if (isLoading) return <SkeletonCards />;
   if (isError) return <ErrorState message="Unable to load queue." onRetry={() => refetch()} />;
@@ -47,7 +47,7 @@ export function TicketQueuePage() {
 
 export function NotificationsPage() {
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ['notifs'], queryFn: async () => (await import('../../api/helpdeskApi')).notificationApi.list().then((r) => r.data) });
+  const { data, isLoading } = useQuery({ queryKey: ['notifs'], queryFn: async () => (await import('../../api/helpdeskApi')).notificationApi.list().then((r) => r.data), refetchInterval: 30000 });
   if (isLoading) return <Container className="py-4"><Spinner animation="border" aria-label="Loading notifications" /></Container>;
   const items = data ?? [];
   if (!items.length) return <Container className="py-4"><EmptyState icon={<Bell size={32} className="mx-auto mb-2 text-secondary" />} title="You're all caught up" desc="No notifications right now." /></Container>;

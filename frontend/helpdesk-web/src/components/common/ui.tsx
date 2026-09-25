@@ -42,10 +42,10 @@ export function PageHeader({ title, desc, actions }: { title: string; desc?: str
     </div>
   );
 }
-export function StatCard({ icon, label, value, trend }: { icon: React.ReactNode; label: string; value: string | number; trend?: string }) {
+export function StatCard({ icon, tone, label, value, trend }: { icon: React.ReactNode; tone?: 'blue' | 'amber' | 'green' | 'slate' | 'red'; label: string; value: string | number; trend?: string }) {
   return (
     <Card className="p-3 metric-card interactive-card">
-      <div className="d-flex justify-content-between align-items-center"><span className="text-secondary small">{label}</span>{icon}</div>
+      <div className="d-flex justify-content-between align-items-center"><span className="text-secondary small">{label}</span><span className={`stat-chip ${tone ?? 'slate'}`}>{icon}</span></div>
       <div className="fs-3 fw-bold mt-1">{value}</div>
       {trend && <small className="text-secondary">{trend}</small>}
     </Card>
@@ -74,7 +74,7 @@ export function FilterChip({ label, onClear }: { label: string; onClear: () => v
 export function EmptyState({ icon, title, desc, action }: { icon?: React.ReactNode; title: string; desc: string; action?: React.ReactNode }) {
   return (
     <Card className="p-5 text-center">{icon ?? <Inbox size={36} className="mx-auto mb-2 text-secondary" aria-hidden />}
-      <h5>{title}</h5><p className="text-secondary">{desc}</p>{action}</Card>
+      <h5>{title}</h5><p className="text-secondary">{desc}</p>{action && <div className="empty-cta">{action}</div>}</Card>
   );
 }
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {

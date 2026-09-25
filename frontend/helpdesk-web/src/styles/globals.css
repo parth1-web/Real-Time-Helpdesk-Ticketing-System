@@ -61,6 +61,13 @@ h1, h2 { letter-spacing: -0.01em; }
 :focus-visible { outline: 3px solid rgba(79, 70, 229, 0.5); outline-offset: 2px; }
 .metric-card { border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border); background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 72%, var(--primary) 5%) 100%); }
 .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat-chip { width: 36px; height: 36px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 36px; }
+.stat-chip.blue { background: rgba(37, 99, 235, 0.12); color: var(--info); }
+.stat-chip.amber { background: rgba(217, 119, 6, 0.13); color: var(--warning); }
+.stat-chip.green { background: rgba(22, 163, 74, 0.12); color: var(--success); }
+.stat-chip.slate { background: var(--surface-secondary); color: var(--text-secondary); }
+.stat-chip.red { background: rgba(220, 38, 38, 0.1); color: var(--danger); }
+.empty-cta { width: auto; margin: 0 auto; display: inline-block; }
 .ticket-card { cursor: pointer; }
 .ticket-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .conversation-bubble { border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface); }
