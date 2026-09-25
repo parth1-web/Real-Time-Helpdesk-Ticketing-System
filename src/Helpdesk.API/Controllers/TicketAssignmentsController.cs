@@ -1,6 +1,7 @@
 using Helpdesk.API.Authorization;
 using Helpdesk.API.Hubs;
 using Helpdesk.Domain.Entities;
+using Helpdesk.Domain.Enums;
 using Helpdesk.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
