@@ -7,6 +7,7 @@ import { ticketApi, categoryApi, departmentApi, messageApi, feedbackApi, assignm
 import { Ticket as TicketIcon, Clock, CheckCircle2, Inbox, ArrowRight, Headset } from 'lucide-react';
 import { PageHeader, EmptyState, ErrorState, SkeletonCards, SkeletonTable, SkeletonMessage, StatusBadge, PriorityBadge, SlaBadge, UserAvatar, StatCard, ConfirmModal } from '../../components/common/ui';
 import { useAuthStore, canAssign } from '../../store/useAuthStore';
+import { getToken } from '../../store/session';
 import { VALID_TRANSITIONS } from '../../types';
 import { createTicketConnection } from '../../api/signalr';
 import { useEffect } from 'react';
@@ -131,7 +132,7 @@ export function TicketDetailPage({ id }: { id: string }) {
   const { data: attachments, refetch: refetchAtts } = useQuery({ queryKey: ['attachments', id], queryFn: async () => (await attachmentApi.list(id)).data });
   const { data: activity } = useQuery({ queryKey: ['activity', id], queryFn: async () => (await activityApi.forTicket(id)).data.catch(() => []) });
   useEffect(() => {
-    const token = localStorage.getItem('accessToken') ?? '';
+    const token = getToken() ?? '';
     const conn = createTicketConnection(token);
     conn.start().then(() => { conn.invoke('JoinTicket', id).catch(() => undefined); }).catch(() => undefined);
     conn.on('TicketMessageAdded', () => { qc.invalidateQueries({ queryKey: ['msgs', id] }); setFlashId('latest'); setTimeout(() => setFlashId(''), 1600); });

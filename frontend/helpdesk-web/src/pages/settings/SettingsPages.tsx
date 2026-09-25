@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useUi } from '../../store/useUi';
 import { PageHeader, UserAvatar } from '../../components/common/ui';
 import { authApi } from '../../api/helpdeskApi';
+import { getRefresh } from '../../store/session';
 
 export function ProfilePage() {
   const { user } = useAuthStore();
@@ -60,7 +61,7 @@ export function SettingsPage() {
           )}
           {tab === 'account' && (
             <Card className="p-4"><h6>Account</h6><p className="text-secondary">Sign out everywhere, or switch session.</p>
-              <Button variant="outline-secondary" onClick={async () => { const rt = localStorage.getItem('refreshToken'); if (rt) await authApi.logout(rt).catch(() => undefined); clear(); window.location.href = '/login'; }}>Log out</Button></Card>
+              <Button variant="outline-secondary" onClick={async () => { const rt = getRefresh(); if (rt) await authApi.logout(rt).catch(() => undefined); clear(); window.location.href = '/login'; }}>Log out</Button></Card>
           )}
           {tab === 'security' && (
             <Card className="p-4"><h6>Security</h6><Form.Group className="mb-2"><Form.Label>Current password</Form.Label><Form.Control type="password" autoComplete="current-password" aria-label="Current password" /></Form.Group><Form.Group className="mb-2"><Form.Label>New password</Form.Label><Form.Control type="password" autoComplete="new-password" aria-label="New password" /></Form.Group><Button disabled>Change password</Button> <small className="text-secondary ms-2">Available with the password API.</small></Card>

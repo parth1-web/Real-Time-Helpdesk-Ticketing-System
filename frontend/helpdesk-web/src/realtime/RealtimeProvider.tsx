@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useQueryClient } from '@tanstack/react-query';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { useAuthStore } from '../store/useAuthStore';
+import { getToken } from '../store/session';
 
 type LiveState = 'live' | 'connecting' | 'offline';
 const LiveCtx = createContext<LiveState>('connecting');
@@ -17,11 +18,11 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<LiveState>('connecting');
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken') ?? '';
+    const token = getToken() ?? '';
     if (!token) { setState('offline'); return; }
     let disposed = false;
     const mk = (url: string) =>
-      new HubConnectionBuilder().withUrl(url, { accessTokenFactory: () => localStorage.getItem('accessToken') ?? '' }).withAutomaticReconnect().build();
+      new HubConnectionBuilder().withUrl(url, { accessTokenFactory: () => getToken() ?? '' }).withAutomaticReconnect().build();
     const tickets = mk('/hubs/tickets');
     const notifs = mk('/hubs/notifications');
     const on = (c: HubConnection) => {

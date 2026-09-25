@@ -3,9 +3,10 @@ import { Spinner, Container, Alert } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { authApi } from '../api/helpdeskApi';
 import { useAuthStore } from '../store/useAuthStore';
+import { getToken } from '../store/session';
 
 export function ProtectedRoute({ children }: { children: JSX.Element }) {
-  const token = localStorage.getItem('accessToken');
+  const token = getToken();
   const loc = useLocation();
   if (!token) return <Navigate to="/login" state={{ from: loc.pathname }} replace />;
   return children;

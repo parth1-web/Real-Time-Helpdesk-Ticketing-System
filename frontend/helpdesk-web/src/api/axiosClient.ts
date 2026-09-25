@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { getToken, getRefresh, touchSession, clearSession } from '../store/session';
 const api = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? '' });
 api.interceptors.request.use((c) => {
-  const t = localStorage.getItem('accessToken');
+  const t = getToken();
   if (t) c.headers.Authorization = `Bearer ${t}`;
   return c;
 });
@@ -12,13 +13,12 @@ api.interceptors.response.use(
     if (err.response?.status === 401 && !orig._retried) {
       orig._retried = true;
       try {
-        const rt = localStorage.getItem('refreshToken');
+        const rt = getRefresh();
         const { data } = await axios.post('/api/auth/refresh', { refreshToken: rt });
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
+        touchSession(data.accessToken, data.refreshToken);
         orig.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(orig);
-      } catch { localStorage.clear(); window.location.href = '/login'; }
+      } catch { clearSession(); window.location.href = '/login'; }
     }
     return Promise.reject(err);
   }

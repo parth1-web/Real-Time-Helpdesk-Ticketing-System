@@ -11,6 +11,7 @@ import { AgentDashboard, TicketQueuePage, NotificationsPage } from './pages/agen
 import { AdminDashboard, AdminLists, SlaPage } from './pages/admin/AdminPages';
 import { RealtimeProvider } from './realtime/RealtimeProvider';
 import { ProfilePage, SettingsPage } from './pages/settings/SettingsPages';
+import { getToken } from './store/session';
 
 const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 15000 } } });
 
@@ -38,7 +39,7 @@ function Toasts() {
 }
 function DetailByParam() { const { id } = useParams(); return id ? <TicketDetailPage id={id} /> : null; }
 function RootRedirect() {
-  const token = localStorage.getItem('accessToken');
+  const token = getToken();
   return <Navigate to={token ? '/dashboard' : '/login'} replace />;
 }
 function NotFound() { return <Container className="py-5 text-center"><h2>404</h2><p>Page not found. The page you&apos;re looking for doesn&apos;t exist.</p><Button href="/dashboard">Back to Dashboard</Button></Container>; }
