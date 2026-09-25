@@ -112,7 +112,7 @@ Infrastructure services, storage, cache, background jobs
 The default development connection string is:
 
 ```text
-Host=localhost;Port=5432;Database=helpdesk;Username=postgres;Password=postgres
+Host=localhost;Port=5432;Database=helpdesk;Username=postgres;Password=<set-via-secret>
 ```
 
 Update it in `src/Helpdesk.API/appsettings.json` or through environment variables for your local environment.
