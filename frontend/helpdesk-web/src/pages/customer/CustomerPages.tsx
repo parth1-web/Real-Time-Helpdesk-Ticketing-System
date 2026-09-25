@@ -102,11 +102,13 @@ export function TicketDetailPage({ id }: { id: string }) {
   const { data: msgs, isLoading, isError, refetch } = useQuery({ queryKey: ['msgs', id], queryFn: async () => (await messageApi.list(id)).data });
   const [text, setText] = useState('');
   const [rating, setRating] = useState(5);
+  const [copied, setCopied] = useState(false);
+  const [flashId, setFlashId] = useState('');
   useEffect(() => {
     const token = localStorage.getItem('accessToken') ?? '';
     const conn = createTicketConnection(token);
     conn.start().then(() => { conn.invoke('JoinTicket', id).catch(() => undefined); }).catch(() => undefined);
-    conn.on('TicketMessageAdded', () => qc.invalidateQueries({ queryKey: ['msgs', id] }));
+    conn.on('TicketMessageAdded', () => { qc.invalidateQueries({ queryKey: ['msgs', id] }); setFlashId('latest'); setTimeout(() => setFlashId(''), 1600); });
     conn.on('TicketStatusChanged', () => { qc.invalidateQueries({ queryKey: ['ticket', id] }); qc.invalidateQueries({ queryKey: ['msgs', id] }); });
     return () => { conn.stop().catch(() => undefined); };
   }, [id, qc]);
@@ -117,21 +119,30 @@ export function TicketDetailPage({ id }: { id: string }) {
   };
   return (
     <div>
-      <PageHeader title={`${ticket?.ticketNumber ?? 'TCK'} — ${ticket?.subject ?? ''}`} desc={ticket ? `Created ${new Date(ticket.createdAt).toLocaleString()}` : ''} actions={ticket && <span className="d-flex gap-2"><StatusBadge s={ticket.status} /><PriorityBadge p={ticket.priority} /></span>} />
+      <PageHeader title={`${ticket?.ticketNumber ?? 'TCK'} — ${ticket?.subject ?? ''}`} desc={ticket ? `Created ${new Date(ticket.createdAt).toLocaleString()}` : ''} actions={ticket && <span className="d-flex gap-2 align-items-center"><StatusBadge s={ticket.status} /><PriorityBadge p={ticket.priority} /><Button size="sm" variant="outline-secondary" title="Copy ticket number" onClick={() => { navigator.clipboard?.writeText(ticket.ticketNumber).catch(() => undefined); setCopied(true); setTimeout(() => setCopied(false), 1200); }}>{ticket.ticketNumber} 📋</Button>{copied && <small className="text-success">Copied!</small>}</span>} />
       <Row>
         <Col lg={8}>
-          <h6>Conversation <span className="live-dot ms-1" title="Live" /> <small className="text-secondary">Live</small></h6>
-          {isLoading && <p><span className="skeleton d-block p-4">Loading messages...</span></p>}
+          <h6>Conversation <span className="live-dot ms-1" title="Live" aria-label="Connected" /> <small className="text-secondary">Live</small></h6>
+          {isLoading && <div><div className="skeleton p-4 mb-2">Loading…</div><div className="skeleton p-4 mb-2">Loading…</div></div>}
           {isError && <ErrorState message="Couldn't load messages." onRetry={() => refetch()} />}
-          {(msgs ?? []).map((m) => (
-            <Card key={m.id} className={`mb-2 p-2 conversation-bubble ${m.isInternal ? 'internal-note' : ''}`}>
-              <div className="d-flex gap-2 align-items-center"><UserAvatar name={m.senderId.slice(0, 4)} size={28} /><small className="text-secondary">{new Date(m.createdAt).toLocaleString()}</small>{m.isInternal && <Badge bg="warning">🔒 Internal Note</Badge>}</div>
-              <div className="mt-1">{m.message}</div>
-            </Card>
-          ))}
-          <Card className="p-2 mt-3">
-            <Form.Control as="textarea" rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Write your reply... (Ctrl+Enter to send)" aria-label="Reply" onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) send(false); }} />
-            <div className="d-flex gap-2 mt-2"><Button onClick={() => send(false)}>Send →</Button><Button variant="outline-secondary">📎 Attach</Button></div>
+          {(msgs ?? []).map((m, i, arr) => {
+            const mine = m.senderId === user?.id;
+            return (
+              <Card key={m.id} className={`mb-2 p-2 conversation-bubble msg-enter ${m.isInternal ? 'internal-note' : mine ? '' : 'agent'} ${flashId && i === arr.length - 1 ? 'msg-flash' : ''}`}>
+                <div className="d-flex gap-2 align-items-center">
+                  <UserAvatar name={m.isInternal ? 'Staff' : m.senderId.slice(0, 4)} size={28} />
+                  <strong className="small">{m.isInternal ? 'Support staff' : mine ? 'You' : 'Support Agent'}</strong>
+                  <small className="text-secondary">{new Date(m.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</small>
+                  {m.isInternal && <Badge bg="warning">🔒 Internal Note · staff only</Badge>}
+                </div>
+                <div className="mt-1">{m.message}</div>
+              </Card>
+            );
+          })}
+          <Card className="p-2 mt-3 composer-sticky">
+            <Form.Control as="textarea" rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a reply... (Ctrl+Enter to send)" aria-label="Reply" aria-describedby="composer-hint" onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) send(false); }} />
+            <small id="composer-hint" className="text-secondary">Ctrl+Enter to send · {text.length}/5000</small>
+            <div className="d-flex gap-2 mt-2 composer-actions"><Button onClick={() => send(false)}>Send →</Button><Button variant="outline-secondary">📎 Attach</Button></div>
           </Card>
           {ticket && (ticket.status === 'Resolved' || ticket.status === 'Closed') && (
             <Card className="p-3 mt-3 text-center"><h6>How was your support experience?</h6>
@@ -140,7 +151,8 @@ export function TicketDetailPage({ id }: { id: string }) {
           )}
         </Col>
         <Col lg={4}>
-          <Card className="p-3"><h6>Ticket information</h6><p className="mb-1">Status: {ticket && <StatusBadge s={ticket.status} />}</p><p className="mb-1">Priority: {ticket && <PriorityBadge p={ticket.priority} />}</p><p className="mb-1">SLA: {ticket && <SlaBadge sla={ticket.slaStatus} dueAt={ticket.dueAt} />}</p><p className="mb-0 text-secondary">Department / Agent / Activity update in real time.</p></Card>
+          <Card className="p-3 mb-2"><h6>Ticket Details</h6><p className="mb-1">Status: {ticket && <StatusBadge s={ticket.status} />}</p><p className="mb-1">Priority: {ticket && <PriorityBadge p={ticket.priority} />}</p><p className="mb-1">SLA: {ticket && <SlaBadge sla={ticket.slaStatus} dueAt={ticket.dueAt} />}</p><p className="mb-0 text-secondary">Department / Assigned agent update in real time.</p></Card>
+          <Card className="p-3"><h6>Activity</h6><div className="timeline"><div className="timeline-item"><strong>Ticket created</strong><br /><small className="text-secondary">{ticket ? new Date(ticket.createdAt).toLocaleString() : ''}</small></div><div className="timeline-item"><strong>Conversation updated</strong><br /><small className="text-secondary">{(msgs ?? []).length} messages</small></div></div></Card>
         </Col>
       </Row>
     </div>
