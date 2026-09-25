@@ -42,12 +42,12 @@ export function PageHeader({ title, desc, actions }: { title: string; desc?: str
     </div>
   );
 }
-export function StatCard({ icon, tone, label, value, trend }: { icon: React.ReactNode; tone?: 'blue' | 'amber' | 'green' | 'slate' | 'red'; label: string; value: string | number; trend?: string }) {
+export function StatCard({ dark, label, value, sub }: { dark?: boolean; label: string; value: string | number; sub?: string }) {
   return (
-    <Card className="p-3 metric-card interactive-card">
-      <div className="d-flex justify-content-between align-items-center"><span className="text-secondary small">{label}</span><span className={`stat-chip ${tone ?? 'slate'}`}>{icon}</span></div>
-      <div className="fs-3 fw-bold mt-1">{value}</div>
-      {trend && <small className="text-secondary">{trend}</small>}
+    <Card className={`p-3 metric-card interactive-card ${dark ? 'dark' : ''}`}>
+      <div className="stat-top"><span className={dark ? '' : 'text-secondary'}>{label}</span><span className="go-circle" aria-hidden>↗</span></div>
+      <div className="stat-num mt-1">{value}</div>
+      {sub && <div className={`stat-sub ${dark ? '' : 'text-secondary'}`}>{sub}</div>}
     </Card>
   );
 }

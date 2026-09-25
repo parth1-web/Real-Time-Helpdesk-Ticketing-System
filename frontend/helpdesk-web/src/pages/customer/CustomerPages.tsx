@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { ticketApi, categoryApi, departmentApi, messageApi, feedbackApi, assignmentApi, attachmentApi, activityApi } from '../../api/helpdeskApi';
-import { Ticket as TicketIcon, Clock, CheckCircle2, Inbox, ArrowRight, Headset } from 'lucide-react';
+import { ArrowRight, Headset } from 'lucide-react';
 import { PageHeader, EmptyState, ErrorState, SkeletonCards, SkeletonTable, SkeletonMessage, StatusBadge, PriorityBadge, SlaBadge, UserAvatar, StatCard, ConfirmModal } from '../../components/common/ui';
 import { useAuthStore, canAssign } from '../../store/useAuthStore';
 import { getToken } from '../../store/session';
@@ -28,10 +28,10 @@ export function CustomerDashboard() {
     <div>
       <PageHeader title={`${daypart}, ${user?.fullName ?? 'there'} 👋`} desc="We're here to help. Everything below updates live." actions={<span className="d-flex gap-2 align-items-center"><span className="live-pill live"><span className="live-dot" /> Live</span><Link to="/tickets/new" className="btn btn-primary"><Plus size={15} /> Create New Ticket</Link></span>} />
       <Row className="g-3 mb-3 stat-grid">
-        <Col xs={12} sm={6} lg={3}><StatCard icon={<TicketIcon size={18} />} tone="blue" label="Open Tickets" value={open} trend="Needs attention first" /></Col>
-        <Col xs={12} sm={6} lg={3}><StatCard icon={<Clock size={18} />} tone="amber" label="Waiting for Reply" value={waiting} trend={waiting ? 'Agent is waiting on you' : 'Nothing pending'} /></Col>
-        <Col xs={12} sm={6} lg={3}><StatCard icon={<CheckCircle2 size={18} />} tone="green" label="Resolved" value={resolved} trend="Resolved + closed" /></Col>
-        <Col xs={12} sm={6} lg={3}><StatCard icon={<Inbox size={18} />} tone={atRisk ? 'red' : 'slate'} label="SLA Attention" value={atRisk} trend={atRisk ? 'At risk or breached' : 'All clear'} /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard dark label="Open Tickets" value={open} sub="Needs attention first" /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard label="Waiting for Reply" value={waiting} sub={waiting ? 'Agent is waiting on you' : 'Nothing pending'} /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard label="Resolved" value={resolved} sub="Resolved + closed" /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard label="SLA Attention" value={atRisk} sub={atRisk ? 'At risk or breached' : 'All clear'} /></Col>
       </Row>
       <h6 className="mt-1 mb-2">Recent Tickets</h6>
       {items.length === 0
