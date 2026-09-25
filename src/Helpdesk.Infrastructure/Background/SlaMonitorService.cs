@@ -1,6 +1,6 @@
+using Helpdesk.Application.Interfaces;
 using Helpdesk.Domain.Enums;
 using Helpdesk.Infrastructure.Data;
-using Helpdesk.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,7 +22,7 @@ public class SlaMonitorService : BackgroundService
             {
                 using var scope = _sp.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                var sla = scope.ServiceProvider.GetRequiredService<SlaService>();
+                var sla = scope.ServiceProvider.GetRequiredService<ISlaService>();
                 var now = DateTime.UtcNow;
                 var active = await db.Tickets
                     .Where(t => t.DueAt != null && (t.Status == TicketStatus.Open || t.Status == TicketStatus.InProgress || t.Status == TicketStatus.WaitingForCustomer))

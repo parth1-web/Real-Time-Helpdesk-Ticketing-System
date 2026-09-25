@@ -93,6 +93,8 @@ builder.Services.AddRateLimiter(o =>
 var app = builder.Build();
 app.UseSerilogRequestLogging();
 if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseCors("web");
 app.UseRateLimiter();
 app.UseAuthentication();
@@ -100,6 +102,7 @@ app.UseAuthorization();
 app.MapControllers().RequireRateLimiting("write");
 app.MapHub<TicketHub>("/hubs/tickets");
 app.MapHub<NotificationHub>("/hubs/notifications");
+app.MapFallbackToFile("/index.html");
 
 using (var scope = app.Services.CreateScope())
 {

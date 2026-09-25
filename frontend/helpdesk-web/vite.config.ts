@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: { port: 5173, proxy: { '/api': 'http://localhost:5000', '/hubs': { target: 'http://localhost:5000', ws: true } } },
-  build: { outDir: 'dist' }
+  build: { outDir: '../../src/Helpdesk.API/wwwroot', emptyOutDir: true }
 });
