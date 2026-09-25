@@ -24,7 +24,7 @@ jobs:
         working-directory: frontend/helpdesk-web
       - run: npm run build
         working-directory: frontend/helpdesk-web
-      - run: ls ../src/Helpdesk.API/wwwroot/index.html
+      - run: test -f src/Helpdesk.API/wwwroot/index.html
   integrated:
     runs-on: ubuntu-latest
     needs: [backend, frontend]
