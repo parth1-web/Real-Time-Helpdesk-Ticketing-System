@@ -20,4 +20,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Helpdesk.Domain\Helpdesk.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Helpdesk.Application\Helpdesk.Application.csproj" />
+  </ItemGroup>
+
 </Project>
