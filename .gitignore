@@ -6,6 +6,10 @@
 # dotenv files
 .env
 
+# Local ASP.NET configuration and secrets
+src/Helpdesk.API/appsettings.json
+src/Helpdesk.API/appsettings.*.local.json
+
 # User-specific files
 *.rsuser
 *.suo

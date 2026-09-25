@@ -23,11 +23,14 @@ var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 builder.Host.UseSerilog();
 
-var conn = builder.Configuration.GetConnectionString("Default")
-    ?? "Host=localhost;Port=5432;Database=helpdesk;Username=postgres;Password=postgres";
+var conn = builder.Configuration.GetConnectionString("Default");
+if (string.IsNullOrWhiteSpace(conn))
+    throw new InvalidOperationException("ConnectionStrings:Default is required. Configure it in an ignored appsettings.json or environment variables.");
 builder.Services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(conn));
 
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "dev-super-secret-key-change-me-32chars!!";
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
+    throw new InvalidOperationException("Jwt:Key must be configured with at least 32 characters.");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
