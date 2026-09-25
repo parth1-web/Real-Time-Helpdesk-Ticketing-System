@@ -1,9 +1,11 @@
-import { Card, Row, Col, Table, Badge, Button, Form, Container, Spinner, Alert } from 'react-bootstrap';
-import { useQuery } from '@tanstack/react-query';
+import { Card, Row, Col, Table, Badge, Button, Form, Container, Spinner } from 'react-bootstrap';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { Bell } from 'lucide-react';
 import { ticketApi, reportApi, departmentApi } from '../../api/helpdeskApi';
-import { TicketCard, FilterChip, SkeletonTable } from '../../components/common/ui';
+import { PageHeader, EmptyState, ErrorState, SkeletonCards } from '../../components/common/ui';
+import { FilterChip } from '../../components/common/ui';
 
 export function AgentDashboard() {
   const { data } = useQuery({ queryKey: ['summary'], queryFn: async () => (await reportApi.summary()).data });
@@ -44,9 +46,14 @@ export function TicketQueuePage() {
 }
 
 export function NotificationsPage() {
+  const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ['notifs'], queryFn: async () => (await import('../../api/helpdeskApi')).notificationApi.list().then((r) => r.data) });
-  if (isLoading) return <Container className="py-4"><Spinner animation="border" /></Container>;
+  if (isLoading) return <Container className="py-4"><Spinner animation="border" aria-label="Loading notifications" /></Container>;
   const items = data ?? [];
-  if (!items.length) return <Container className="py-4"><Alert variant="info">No notifications. You&apos;re all caught up.</Alert></Container>;
-  return (<Container fluid><PageHeader title="Notifications" actions={<Button size="sm" variant="outline-secondary" onClick={() => import('../../api/helpdeskApi').then((m) => m.notificationApi.markAllRead())}>Mark all as read</Button>} />{items.map((n) => (<Card key={n.id} className="mb-2 p-3"><div>{!n.isRead && '● '} <strong>{n.title}</strong></div><div className="text-secondary">{n.message} · {new Date(n.createdAt).toLocaleString()}</div></Card>))}</Container>);
+  if (!items.length) return <Container className="py-4"><EmptyState icon={<Bell size={32} className="mx-auto mb-2 text-secondary" />} title="You're all caught up" desc="No notifications right now." /></Container>;
+  return (<Container fluid><PageHeader title="Notifications" desc="Real-time updates from tickets and SLA." actions={<Button size="sm" variant="outline-secondary" onClick={async () => { await import('../../api/helpdeskApi').then((m) => m.notificationApi.markAllRead()); qc.invalidateQueries({ queryKey: ['notifs'] }); qc.invalidateQueries({ queryKey: ['unread'] }); }}>Mark all as read</Button>} />{items.map((n) => (
+    <Card key={n.id} className="mb-2 p-3" style={!n.isRead ? { background: 'var(--surface-secondary)' } : undefined}>
+      <div className="d-flex gap-2 align-items-start"><span aria-hidden>{!n.isRead ? '● ' : ''}</span><div><strong>{n.title}</strong><div className="text-secondary small">{n.message} · {new Date(n.createdAt).toLocaleString()}</div></div>
+        {!n.isRead && <Button size="sm" variant="link" className="ms-auto" onClick={async () => { await import('../../api/helpdeskApi').then((m) => m.notificationApi.markRead(n.id)); qc.invalidateQueries({ queryKey: ['notifs'] }); qc.invalidateQueries({ queryKey: ['unread'] }); }}>Mark read</Button>}</div>
+    </Card>))}</Container>);
 }
