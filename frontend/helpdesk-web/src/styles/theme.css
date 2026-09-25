@@ -2,15 +2,15 @@
   --primary: #4f46e5;
   --primary-color: #4f46e5;
   --primary-hover: #4338ca;
-  --background: #f8fafc;
-  --background-color: #f8fafc;
+  --background: #e9edf5;
+  --background-color: #e9edf5;
   --surface: #ffffff;
   --surface-color: #ffffff;
-  --surface-secondary: #f1f5f9;
-  --text-primary: #111827;
-  --text-secondary: #64748b;
-  --border: #e2e8f0;
-  --border-color: #e2e8f0;
+  --surface-secondary: #eef2f9;
+  --text-primary: #16213a;
+  --text-secondary: #5b6b86;
+  --border: #d9e1ef;
+  --border-color: #d9e1ef;
   --success: #16a34a;
   --success-color: #16a34a;
   --warning: #d97706;
@@ -22,8 +22,8 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-sm: 0 1px 2px rgba(22, 33, 58, 0.07);
+  --shadow-md: 0 6px 18px rgba(35, 55, 110, 0.12);
   --transition-fast: 150ms ease;
   --transition-normal: 200ms ease;
   --content-max: 1600px;
@@ -73,3 +73,17 @@
 }
 [data-theme="dark"] .text-secondary { color: var(--text-secondary) !important; }
 [data-theme="dark"] .btn-outline-secondary { color: var(--text-primary); border-color: var(--border); }
+:root {
+  --sidebar-bg: linear-gradient(180deg, #1a2340 0%, #141b31 100%);
+  --sidebar-text: #c3cde3;
+  --sidebar-active: #ffffff;
+  --sidebar-muted: #7f8db0;
+  --sidebar-border: rgba(255, 255, 255, 0.09);
+}
+[data-theme="dark"] {
+  --sidebar-bg: #0d1322;
+  --sidebar-text: #a8b4cf;
+  --sidebar-active: #ffffff;
+  --sidebar-muted: #64748f;
+  --sidebar-border: #1e2942;
+}
