@@ -2,7 +2,6 @@ import { Suspense, lazy, Component, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { Toast, ToastContainer, Spinner, Container, Alert, Button } from 'react-bootstrap';
-import { LifeBuoy } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { AppShell } from './layouts/AppShell';
 import { ProtectedRoute, RoleRoute } from './routes/guards';
@@ -38,29 +37,9 @@ function Toasts() {
   return <ToastContainer position="bottom-end" className="p-3">{items.map((t) => <Toast key={t.id} onClose={() => setItems((s) => s.filter((x) => x.id !== t.id))} autohide><Toast.Header><strong className="me-auto">🔔 {t.title}</strong></Toast.Header><Toast.Body>{t.body}</Toast.Body></Toast>)}</ToastContainer>;
 }
 function DetailByParam() { const { id } = useParams(); return id ? <TicketDetailPage id={id} /> : null; }
-function Landing() {
-  return (
-    <div className="auth-wrap">
-      <div className="auth-show">
-        <div className="auth-brand"><span className="brand-badge"><LifeBuoy size={20} /></span> HelpDesk</div>
-        <h1>Modern support.<br />Faster resolutions.</h1>
-        <p style={{ opacity: 0.85 }}>Realtime conversations, SLA tracking and analytics — one workspace for customers, agents and admins.</p>
-        <div className="auth-stats">
-          <div className="auth-stat"><b>Live</b><small>Realtime sync</small></div>
-          <div className="auth-stat"><b>SLA</b><small>At-risk alerts</small></div>
-          <div className="auth-stat"><b>CSAT</b><small>Feedback built-in</small></div>
-        </div>
-      </div>
-      <div className="auth-form-side">
-        <div className="text-center" style={{ maxWidth: 440 }}>
-          <h2 className="fw-bold">Support, minus the chaos.</h2>
-          <p className="text-secondary">Customer → Ticket → Agent → Resolution → Feedback.</p>
-          <p><a className="btn btn-primary me-2" href="/register">Get Started</a><a className="btn btn-outline-secondary" href="/login">Sign in</a></p>
-          <p><a className="btn btn-link" href="/dashboard">View demo dashboard →</a></p>
-        </div>
-      </div>
-    </div>
-  );
+function RootRedirect() {
+  const token = localStorage.getItem('accessToken');
+  return <Navigate to={token ? '/dashboard' : '/login'} replace />;
 }
 function NotFound() { return <Container className="py-5 text-center"><h2>404</h2><p>Page not found. The page you&apos;re looking for doesn&apos;t exist.</p><Button href="/dashboard">Back to Dashboard</Button></Container>; }
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
@@ -74,7 +53,7 @@ export default function App() {
         <Suspense fallback={<Container className="py-5 text-center"><Spinner animation="border" /></Container>}>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/dashboard" element={<Shell title="Dashboard"><CustomerDashboard /></Shell>} />
