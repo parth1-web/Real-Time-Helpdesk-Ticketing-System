@@ -1,6 +1,23 @@
-/* components + responsive helpers — Bootstrap remains the layout system */
+/* Component polish — Bootstrap foundation, SaaS finish */
 .page-header h2 { font-weight: 700; }
-.table thead th { position: sticky; top: 0; background: var(--surface-color); z-index: 1; }
+.modal-content { border-radius: var(--radius-lg); border: 1px solid var(--border); }
+.modal-header { border-bottom: 1px solid var(--border); }
+.modal-footer { border-top: 1px solid var(--border); }
+.dropdown-menu { border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-md); padding: 0.4rem; }
+.dropdown-item { border-radius: var(--radius-sm); }
+.dropdown-item:active { background: var(--primary); }
+.toast { border-radius: var(--radius-md); border: 1px solid var(--border); }
+.table { margin-bottom: 0; }
+.table thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); }
+.table tbody tr { transition: background-color 150ms ease; }
+.table tbody tr:hover { background: var(--surface-secondary); }
+.pagination { margin-bottom: 0; }
+.badge { font-weight: 600; }
+.recharts-tooltip-wrapper { outline: none !important; }
+.recharts-default-tooltip { border-radius: var(--radius-md) !important; border: 1px solid var(--border) !important; }
+[data-theme="dark"] .recharts-default-tooltip { background: var(--surface) !important; color: var(--text-primary) !important; }
+[data-theme="dark"] .recharts-cartesian-axis-tick text { fill: var(--text-secondary); }
+[data-theme="dark"] .recharts-cartesian-grid line { stroke: var(--border); }
 @media (max-width: 991px) {
   .sidebar { display: none; }
   .desktop-table { display: none; }
