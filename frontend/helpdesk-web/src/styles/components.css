@@ -1,0 +1,11 @@
+/* components + responsive helpers — Bootstrap remains the layout system */
+.page-header h2 { font-weight: 700; }
+.table thead th { position: sticky; top: 0; background: var(--surface-color); z-index: 1; }
+@media (max-width: 991px) {
+  .sidebar { display: none; }
+  .desktop-table { display: none; }
+}
+@media (min-width: 992px) {
+  .mobile-cards { display: none !important; }
+  .mobile-offcanvas-btn { display: none !important; }
+}

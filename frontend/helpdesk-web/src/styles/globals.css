@@ -1,0 +1,23 @@
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--background-color);
+  color: var(--text-primary);
+  transition: background-color var(--transition-normal) ease, color var(--transition-normal) ease;
+}
+.app-shell { min-height: 100vh; }
+.sidebar { width: 250px; transition: width var(--transition-normal) ease; }
+.sidebar.collapsed { width: 72px; }
+.sidebar .nav-link { border-radius: var(--radius-md); transition: background-color .2s ease, color .2s ease; }
+.sidebar .nav-link.active { background: var(--primary-color); color: #fff !important; }
+.sidebar .nav-link:hover:not(.active) { background: var(--border-color); }
+.metric-card { border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); transition: transform .2s ease, box-shadow .2s ease; }
+.metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.ticket-card { cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
+.ticket-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+:focus-visible { outline: 3px solid rgba(79,70,229,.5); outline-offset: 2px; }
+.skeleton { background: linear-gradient(90deg, var(--border-color) 25%, var(--surface-color) 50%, var(--border-color) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: var(--radius-sm); }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.conversation-bubble { border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+.internal-note { border-left: 4px solid var(--warning-color); background: rgba(217,119,6,.08); }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success-color); display: inline-block; }
+.live-dot.reconnecting { background: var(--warning-color); }
