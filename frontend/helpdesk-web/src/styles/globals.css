@@ -1,23 +1,41 @@
 body {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: var(--background-color);
+  background: var(--background);
   color: var(--text-primary);
-  transition: background-color var(--transition-normal) ease, color var(--transition-normal) ease;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
+h1, h2 { letter-spacing: -0.01em; }
+.page-header h2 { font-weight: 700; font-size: 1.5rem; }
+.page-header p { color: var(--text-secondary); }
 .app-shell { min-height: 100vh; }
-.sidebar { width: 250px; transition: width var(--transition-normal) ease; }
+.app-main { max-width: var(--content-max); }
+/* Bootstrap default-look overrides */
+.btn-primary { background: var(--primary); border-color: var(--primary); }
+.btn-primary:hover, .btn-primary:focus { background: var(--primary-hover); border-color: var(--primary-hover); }
+.card { border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.form-control, .form-select { border-radius: var(--radius-md); padding: 0.55rem 0.75rem; }
+.form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18); }
+:focus-visible { outline: 3px solid rgba(79, 70, 229, 0.5); outline-offset: 2px; }
+.sidebar { width: 250px; transition: width var(--transition-normal); }
 .sidebar.collapsed { width: 72px; }
-.sidebar .nav-link { border-radius: var(--radius-md); transition: background-color .2s ease, color .2s ease; }
-.sidebar .nav-link.active { background: var(--primary-color); color: #fff !important; }
-.sidebar .nav-link:hover:not(.active) { background: var(--border-color); }
-.metric-card { border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); transition: transform .2s ease, box-shadow .2s ease; }
+.sidebar .nav-link { border-radius: var(--radius-md); position: relative; }
+.sidebar .nav-link.active { background: rgba(79, 70, 229, 0.12); color: var(--primary) !important; font-weight: 600; }
+.sidebar .nav-link.active::before { content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 3px; border-radius: 3px; background: var(--primary); }
+.sidebar .nav-link:hover:not(.active) { background: var(--surface-secondary); }
 .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.ticket-card { cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
+.ticket-card { cursor: pointer; }
 .ticket-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-:focus-visible { outline: 3px solid rgba(79,70,229,.5); outline-offset: 2px; }
-.skeleton { background: linear-gradient(90deg, var(--border-color) 25%, var(--surface-color) 50%, var(--border-color) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: var(--radius-sm); }
-@keyframes shimmer { to { background-position: -200% 0; } }
-.conversation-bubble { border-radius: var(--radius-md); border: 1px solid var(--border-color); }
-.internal-note { border-left: 4px solid var(--warning-color); background: rgba(217,119,6,.08); }
-.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success-color); display: inline-block; }
-.live-dot.reconnecting { background: var(--warning-color); }
+.conversation-bubble { border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface); }
+.conversation-bubble.agent { border-left: 3px solid var(--info); }
+.internal-note { border-left: 4px solid var(--warning); background: rgba(217, 119, 6, 0.08); }
+.composer-sticky { position: sticky; bottom: 0; z-index: 5; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; }
+.live-dot.reconnecting { background: var(--warning); }
+.offline-bar { background: var(--warning); color: #fff; font-size: 0.85rem; }
+.sla-progress { height: 6px; border-radius: 6px; background: var(--surface-secondary); overflow: hidden; }
+.sla-progress > div { height: 100%; background: var(--success); }
+.sla-progress.risk > div { background: var(--warning); }
+.sla-progress.breached > div { background: var(--danger); }
+.timeline { border-left: 2px solid var(--border); margin-left: 6px; padding-left: 16px; }
+.timeline-item { position: relative; padding-bottom: 14px; }
+.timeline-item::before { content: ""; position: absolute; left: -22px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
