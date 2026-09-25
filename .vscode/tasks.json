@@ -75,9 +75,10 @@
     },
     {
       "label": "fullstack: dev (backend + frontend)",
-      "detail": "TWO URLs at once: API :5000 + Vite :5173 (recommended for development)",
+      "detail": "RECOMMENDED: opens backend terminal FIRST (:5000), then frontend (:5173)",
       "dependsOn": ["backend", "frontend: dev"],
       "dependsOrder": "parallel",
+      "group": { "kind": "build", "isDefault": true },
       "problemMatcher": []
     }
   ]
