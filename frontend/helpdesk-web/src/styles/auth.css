@@ -14,7 +14,12 @@
 .auth-stat { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 8px 14px; animation: auth-fade-up .4s ease backwards; }
 .auth-stat b { display: block; font-size: 1.2rem; }
 .auth-stat small { opacity: .75; }
-.auth-form-side { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 20px; background: var(--background); }
+.auth-form-side { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 20px; position: relative; overflow: hidden; background: radial-gradient(circle at 50% 18%, rgba(21,128,61,.18), transparent 34%), radial-gradient(circle at 90% 90%, rgba(14,53,36,.14), transparent 30%), var(--background); }
+.auth-form-side::before { content: ""; position: absolute; inset: 0; opacity: .22; background-image: linear-gradient(rgba(21,128,61,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(21,128,61,.08) 1px, transparent 1px); background-size: 42px 42px; mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent); }
+.auth-form-side::after { content: ""; position: absolute; width: 520px; height: 520px; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 1px solid rgba(21,128,61,.12); border-radius: 50%; box-shadow: 0 0 0 70px rgba(21,128,61,.025), 0 0 0 140px rgba(21,128,61,.018); pointer-events: none; }
+.auth-card { position: relative; z-index: 1; }
+.auth-card-brand { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 18px; font-weight: 800; letter-spacing: -.01em; }
+.auth-card-brand .brand-badge { width: 30px; height: 30px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #1d6a44, #0e2f1e); }
 .auth-card { width: 100%; max-width: 430px; border-radius: 18px; box-shadow: var(--shadow-md); animation: auth-fade-up .5s ease backwards; }
 .auth-card h2 { font-weight: 800; letter-spacing: -.01em; }
 @media (max-width: 575px) { .auth-form-side { padding: 20px 14px; align-items: flex-start; } .auth-card { border-radius: 14px; } }

@@ -4,7 +4,7 @@ import { useForm, type FieldErrors, type FieldValues, type Path, type UseFormReg
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { LifeBuoy, Zap, ShieldCheck, BarChart3, Eye, EyeOff, Mail, Lock, User, Loader2, type LucideIcon } from 'lucide-react';
+import { LifeBuoy, ShieldCheck, Eye, EyeOff, Mail, Lock, User, Loader2, type LucideIcon } from 'lucide-react';
 import { authApi } from '../../api/helpdeskApi';
 import { useAuthStore } from '../../store/useAuthStore';
 import { getToken } from '../../store/session';
@@ -50,22 +50,6 @@ function StatusPill({ status }: { status: 'checking' | 'live' | 'down' }) {
   return <span className="live-pill connecting" role="status">○ Connecting…</span>;
 }
 
-function AnimatedIcon({ icon: Icon, delay = 0 }: { icon: LucideIcon; delay?: number }) {
-  return <div className="auth-feature-icon-wrapper" style={{ animationDelay: `${delay}ms` }}><Icon size={24} /></div>;
-}
-
-function FeatureItem({ icon: Icon, title, description, delay = 0 }: { icon: LucideIcon; title: string; description: string; delay?: number }) {
-  return <div className="auth-feat" style={{ animationDelay: `${delay}ms` }}><AnimatedIcon icon={Icon} delay={delay} /><div><strong>{title}</strong><span>{description}</span></div></div>;
-}
-
-function StatItem({ label, value, delay = 0 }: { label: string; value: string | number; delay?: number }) {
-  return <div className="auth-stat" style={{ animationDelay: `${delay}ms` }}><b>{value}</b><small>{label}</small></div>;
-}
-
-function Showcase() {
-  return <div className="auth-show"><div className="auth-brand"><span className="brand-badge"><LifeBuoy size={20} /></span> HelpDesk</div><h1>Support that feels <span className="text-primary">instant</span>.</h1><p className="mb-0" style={{ opacity: 0.85 }}>Realtime conversations, SLA tracking and analytics — one workspace for customers, agents and admins.</p><div className="auth-feats"><FeatureItem icon={Zap} title="Realtime tickets." description="Messages, assignment and status sync live." delay={100} /><FeatureItem icon={ShieldCheck} title="SLA you can trust." description="At-risk and breach alerts, enforced server-side." delay={200} /><FeatureItem icon={BarChart3} title="Command-center analytics." description="Volume, SLA compliance, CSAT." delay={300} /></div><div className="auth-stats"><StatItem label="SignalR sync" value="Live" delay={100} /><StatItem label="Role workspaces" value="5" delay={200} /><StatItem label="SLA monitor" value="24/7" delay={300} /></div></div>;
-}
-
 function InputWithIcon({ icon: Icon, children, className = '' }: { icon: LucideIcon; children: ReactNode; className?: string }) {
   return <div className={`input-with-icon ${className}`}><span className="input-icon"><Icon size={18} /></span>{children}</div>;
 }
@@ -86,7 +70,7 @@ function FormField<T extends FieldValues>({ register, errors, name, label, place
 }
 
 function AuthLayout({ children, title, subtitle, backend, actions }: { children: ReactNode; title: string; subtitle: string; backend: 'checking' | 'live' | 'down'; actions?: ReactNode }) {
-  return <Card className="p-4 auth-card"><div className="d-flex justify-content-between align-items-center mb-1"><h2 className="mb-0">{title}</h2><StatusPill status={backend} /></div><p className="text-secondary">{subtitle}</p>{children}{actions}</Card>;
+  return <Card className="p-4 auth-card"><div className="auth-card-brand"><span className="brand-badge"><LifeBuoy size={18} /></span><span>HelpDesk</span></div><div className="d-flex justify-content-between align-items-center mb-1"><h2 className="mb-0">{title}</h2><StatusPill status={backend} /></div><p className="text-secondary">{subtitle}</p>{children}{actions}</Card>;
 }
 
 export function LoginPage() {
@@ -98,9 +82,7 @@ export function LoginPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<z.infer<typeof loginSchema>>({ resolver: zodResolver(loginSchema), defaultValues: { remember: true } });
   if (getToken()) return <Navigate to="/dashboard" replace />;
   return (
-    <div className="auth-wrap">
-      <Showcase />
-      <div className="auth-form-side">
+    <div className="auth-form-side">
         <AuthLayout
           title="Welcome back"
           subtitle="Sign in to your support workspace."
@@ -157,8 +139,7 @@ export function LoginPage() {
             {backend === 'down' && <Alert variant="warning" className="mt-2 py-2 small">Backend unreachable — start the API on :5000, then retry.</Alert>}
            </Form>
          </AuthLayout>
-      </div>
-    </div>
+       </div>
   );
 }
 
@@ -172,9 +153,7 @@ export function RegisterPage() {
   const score = [pw.length >= 8, /[A-Z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)].filter(Boolean).length;
   if (getToken()) return <Navigate to="/dashboard" replace />;
   return (
-    <div className="auth-wrap">
-      <Showcase />
-      <div className="auth-form-side">
+    <div className="auth-form-side">
         <AuthLayout
           title="Create account"
           subtitle="Join your support workspace in seconds."
@@ -267,7 +246,6 @@ export function RegisterPage() {
             </Button>
            </Form>
          </AuthLayout>
-      </div>
-    </div>
+       </div>
   );
 }
