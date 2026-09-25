@@ -5,6 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/theme.css';
 import './styles/globals.css';
 import './styles/components.css';
+import './styles/animations.css';
+import './styles/responsive.css';
 import { initTheme } from './store/useUi';
 initTheme();
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);
