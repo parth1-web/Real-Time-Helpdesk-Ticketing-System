@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Helpdesk.API.Controllers;
 
@@ -18,7 +19,8 @@ public class TicketMessagesController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
     private readonly IHubContext<TicketHub> _hub;
-    public TicketMessagesController(ApplicationDbContext db, IHubContext<TicketHub> hub) { _db = db; _hub = hub; }
+    private readonly ILogger<TicketMessagesController> _log;
+    public TicketMessagesController(ApplicationDbContext db, IHubContext<TicketHub> hub, ILogger<TicketMessagesController> log) { _db = db; _hub = hub; _log = log; }
 
     [HttpGet]
     public async Task<ActionResult> List(Guid ticketId, CancellationToken ct)
@@ -59,8 +61,12 @@ public class TicketMessagesController : ControllerBase
         _db.ActivityLogs.Add(new ActivityLog { OrganizationId = ticket.OrganizationId, UserId = userId, TicketId = ticketId, Action = msg.IsInternal ? "Internal note added" : "Message added", EntityType = "TicketMessage", EntityId = msg.Id.ToString() });
         await _db.SaveChangesAsync(ct);
         var evt = msg.IsInternal ? "InternalNoteAdded" : "TicketMessageAdded";
-        // Only broadcast internal notes to staff group; public to ticket group (authz handled by group membership)
-        await _hub.Clients.Group($"ticket:{ticketId}").SendAsync(evt, new { ticketId, msg.Id }, ct);
-        return CreatedAtAction(nameof(List), new { ticketId }, msg);
+        // Realtime must never break the API response: broadcast best-effort only.
+        try
+        {
+            await _hub.Clients.Group($"ticket:{ticketId}").SendAsync(evt, new { ticketId, msg.Id }, ct);
+        }
+        catch (Exception ex) { _log.LogWarning(ex, "SignalR broadcast {Event} failed for ticket {TicketId}", evt, ticketId); }
+        return Created($"/api/tickets/{ticketId}/messages", msg);
     }
 }

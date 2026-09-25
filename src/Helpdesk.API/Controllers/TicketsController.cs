@@ -5,6 +5,7 @@ using Helpdesk.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace Helpdesk.API.Controllers;
 
@@ -15,7 +16,14 @@ public class TicketsController : ControllerBase
 {
     private readonly ITicketService _tickets;
     private readonly IHubContext<TicketHub> _hub;
-    public TicketsController(ITicketService tickets, IHubContext<TicketHub> hub) { _tickets = tickets; _hub = hub; }
+    private readonly ILogger<TicketsController> _log;
+    public TicketsController(ITicketService tickets, IHubContext<TicketHub> hub, ILogger<TicketsController> log) { _tickets = tickets; _hub = hub; _log = log; }
+
+    private async Task BroadcastAsync(string group, string evt, object payload, CancellationToken ct)
+    {
+        try { await _hub.Clients.Group(group).SendAsync(evt, payload, ct); }
+        catch (Exception ex) { _log.LogWarning(ex, "SignalR broadcast {Event} failed for {Group}", evt, group); }
+    }
 
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] TicketCreateRequest req, CancellationToken ct)
@@ -24,7 +32,7 @@ public class TicketsController : ControllerBase
         var org = ClaimsHelper.OrgId(User);
         if (org.HasValue) req = req with { OrganizationId = org.Value };
         var created = await _tickets.CreateAsync(userId, req, ct);
-        await _hub.Clients.Group($"organization:{created.Id}").SendAsync("TicketCreated", created, ct);
+        await BroadcastAsync($"organization:{created.Id}", "TicketCreated", created, ct);
         return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 
@@ -55,7 +63,7 @@ public class TicketsController : ControllerBase
         {
             var ok = await _tickets.ChangeStatusAsync(ClaimsHelper.UserId(User), id, body.GetValueOrDefault("status") ?? "", ct);
             if (!ok) return NotFound();
-            await _hub.Clients.Group($"ticket:{id}").SendAsync("TicketStatusChanged", new { ticketId = id }, ct);
+            await BroadcastAsync($"ticket:{id}", "TicketStatusChanged", new { ticketId = id }, ct);
             return Ok(new { ok });
         }
         catch (InvalidOperationException ex) { return UnprocessableEntity(new { error = ex.Message }); }
@@ -65,7 +73,7 @@ public class TicketsController : ControllerBase
     [Authorize(Roles = "SuperAdmin,OrganizationAdmin,SupportManager,SupportAgent")]
     public async Task<ActionResult> Priority(Guid id, [FromBody] Dictionary<string, string> body, CancellationToken ct)
     {
-        await _hub.Clients.Group($"ticket:{id}").SendAsync("TicketPriorityChanged", new { ticketId = id }, ct);
+        await BroadcastAsync($"ticket:{id}", "TicketPriorityChanged", new { ticketId = id }, ct);
         return Ok(new { ok = true });
     }
 }

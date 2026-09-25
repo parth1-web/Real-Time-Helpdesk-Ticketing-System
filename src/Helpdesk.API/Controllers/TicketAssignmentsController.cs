@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Helpdesk.API.Controllers;
 
@@ -17,7 +18,8 @@ public class TicketAssignmentsController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
     private readonly IHubContext<TicketHub> _hub;
-    public TicketAssignmentsController(ApplicationDbContext db, IHubContext<TicketHub> hub) { _db = db; _hub = hub; }
+    private readonly ILogger<TicketAssignmentsController> _log;
+    public TicketAssignmentsController(ApplicationDbContext db, IHubContext<TicketHub> hub, ILogger<TicketAssignmentsController> log) { _db = db; _hub = hub; _log = log; }
 
     [HttpPost("assign")]
     public async Task<ActionResult> Assign(Guid ticketId, [FromBody] Dictionary<string, Guid> body, CancellationToken ct)
@@ -36,7 +38,8 @@ public class TicketAssignmentsController : ControllerBase
         _db.ActivityLogs.Add(new ActivityLog { OrganizationId = ticket.OrganizationId, UserId = by, TicketId = ticketId, Action = "Ticket assigned", EntityType = "Ticket", EntityId = ticketId.ToString(), Description = agentId.ToString() });
         _db.Notifications.Add(new Notification { UserId = agentId, Type = Domain.Enums.NotificationType.TicketAssigned, Title = $"Assigned {ticket.TicketNumber}", Message = ticket.Subject });
         await _db.SaveChangesAsync(ct);
-        await _hub.Clients.Group($"ticket:{ticketId}").SendAsync("TicketAssigned", new { ticketId, agentId }, ct);
+        try { await _hub.Clients.Group($"ticket:{ticketId}").SendAsync("TicketAssigned", new { ticketId, agentId }, ct); }
+        catch (Exception ex) { _log.LogWarning(ex, "SignalR broadcast TicketAssigned failed for {TicketId}", ticketId); }
         return Ok(new { ticketId, agentId });
     }
 
