@@ -35,8 +35,29 @@ export const notificationApi = {
   markRead: (id: string) => api.patch(`/api/notifications/${id}/read`, {}),
   markAllRead: () => api.patch('/api/notifications/read-all', {}),
 };
-export const reportApi = { summary: () => api.get('/api/reports/summary') };
+export const assignmentApi = {
+  assign: (ticketId: string, agentId: string) => api.post(`/api/tickets/${ticketId}/assign`, { agentId }),
+  unassign: (ticketId: string) => api.post(`/api/tickets/${ticketId}/unassign`, {}),
+  history: (ticketId: string) => api.get(`/api/tickets/${ticketId}/assignments`),
+};
+export const attachmentApi = {
+  list: (ticketId: string) => api.get(`/api/tickets/${ticketId}/attachments`),
+  upload: (ticketId: string, file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return api.post(`/api/tickets/${ticketId}/attachments`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  downloadUrl: (ticketId: string, id: string) => `/api/tickets/${ticketId}/attachments/${id}/download`,
+};
+export const slaApi = {
+  list: () => api.get<SlaPolicy[]>('/api/sla-policies'),
+  create: (p: Partial<SlaPolicy>) => api.post('/api/sla-policies', p),
+  update: (id: string, p: Partial<SlaPolicy>) => api.put(`/api/sla-policies/${id}`, p),
+  remove: (id: string) => api.delete(`/api/sla-policies/${id}`),
+};
 export const feedbackApi = {
   submit: (ticketId: string, rating: number, comment: string) => api.post(`/api/tickets/${ticketId}/feedback`, { rating, comment }),
   get: (ticketId: string) => api.get(`/api/tickets/${ticketId}/feedback`),
 };
+export const reportApi = { summary: () => api.get('/api/reports/summary') };
+export const activityApi = { forTicket: (ticketId: string) => api.get(`/api/tickets/${ticketId}/activity`) };
