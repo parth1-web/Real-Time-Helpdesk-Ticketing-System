@@ -81,18 +81,47 @@ function SidebarBody({ collapsed, onNav, unread }: { collapsed?: boolean; onNav?
           </div>
         ))}
       </div>
-      {!collapsed && (
-        <div className="promo-card mb-2">
-          <strong>{(unread ?? 0) > 0 ? `${unread} unread update${unread === 1 ? '' : 's'}` : 'All caught up'}</strong>
-          <div className="mb-2" style={{ opacity: 0.75 }}>Realtime sync is on.</div>
-          <Button size="sm" variant="light" className="w-100" onClick={() => { onNav?.(); nav('/notifications'); }}>View updates</Button>
-        </div>
-      )}
       <div className="side-user">
         <UserAvatar name={user?.fullName ?? 'U'} size={32} />
         {!collapsed && <div className="text-truncate small"><div className="fw-semibold text-truncate">{user?.fullName}</div><div className="text-secondary text-truncate">{user?.role}</div></div>}
       </div>
     </div>
+  );
+}
+
+function NotifBell() {
+  const nav = useNavigate();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const { data: unread } = useQuery({ queryKey: ['unread'], queryFn: async () => (await notificationApi.unreadCount()).data, refetchInterval: 30000 });
+  const { data, isFetching } = useQuery({
+    queryKey: ['notifs', 'preview'], queryFn: async () => (await notificationApi.list()).data,
+    enabled: open, staleTime: 10000,
+  });
+  const items = (data ?? []).slice(0, 6);
+  const markAll = async () => { await notificationApi.markAllRead(); qc.invalidateQueries({ queryKey: ['notifs'] }); qc.invalidateQueries({ queryKey: ['notifs', 'preview'] }); qc.invalidateQueries({ queryKey: ['unread'] }); };
+  return (
+    <Dropdown show={open} onToggle={(v) => setOpen(v)} align="end">
+      <Dropdown.Toggle variant="outline-secondary" size="sm" className="icon-btn position-relative" aria-label="Notifications">
+        <Bell size={15} />{(unread?.count ?? 0) > 0 && <Badge bg="danger" pill className="pos-badge">{unread!.count > 9 ? '9+' : unread!.count}</Badge>}
+      </Dropdown.Toggle>
+      <Dropdown.Menu className="notif-drop">
+        <div className="d-flex justify-content-between align-items-center px-2 py-1">
+          <strong>Updates</strong>
+          <Button size="sm" variant="link" onClick={markAll}>Mark all read</Button>
+        </div>
+        {isFetching && <div className="px-3 py-2 text-secondary small"><Spinner size="sm" animation="border" /> Loading…</div>}
+        {!isFetching && items.length === 0 && <div className="notif-status"><strong>All caught up</strong><small>Realtime sync is on.</small></div>}
+        {items.map((n) => (
+          <Dropdown.Item key={n.id} className={n.isRead ? '' : 'notif-unread'} onClick={() => { setOpen(false); nav('/notifications'); }}>
+            <div className="fw-semibold">{!n.isRead && '● '}{n.title}</div>
+            <small className="text-secondary">{n.message} · {new Date(n.createdAt).toLocaleString()}</small>
+          </Dropdown.Item>
+        ))}
+        <Dropdown.Divider />
+        <Dropdown.Item className="text-center" onClick={() => { setOpen(false); nav('/notifications'); }}>View all updates →</Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown>
   );
 }
 
@@ -178,9 +207,7 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
           <button className="search-pill" onClick={() => setPalette(true)} aria-label="Search (Ctrl+K)"><Search size={14} /><span>Search tickets…</span><kbd>Ctrl K</kbd></button>
           <div className="top-actions">
             <LivePill />
-            <Link to="/notifications" className="btn btn-outline-secondary btn-sm icon-btn position-relative" aria-label="Notifications">
-              <Bell size={15} />{(unread?.count ?? 0) > 0 && <Badge bg="danger" pill className="pos-badge">{unread!.count > 9 ? '9+' : unread!.count}</Badge>}
-            </Link>
+            <NotifBell />
             <button className="btn btn-outline-secondary btn-sm icon-btn" aria-label="Toggle theme" title="Light / Dark" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}</button>
             <Dropdown>
               <Dropdown.Toggle variant="light" size="sm" className="profile-toggle" aria-label="Account">

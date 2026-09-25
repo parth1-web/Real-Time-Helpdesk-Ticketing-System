@@ -53,12 +53,27 @@ export function TicketQueuePage() {
 export function NotificationsPage() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ['notifs'], queryFn: async () => (await import('../../api/helpdeskApi')).notificationApi.list().then((r) => r.data), refetchInterval: 30000 });
+  const { data: unread } = useQuery({ queryKey: ['unread'], queryFn: async () => (await import('../../api/helpdeskApi')).notificationApi.unreadCount().then((r) => r.data), refetchInterval: 30000 });
+  const markAll = async () => { await import('../../api/helpdeskApi').then((m) => m.notificationApi.markAllRead()); qc.invalidateQueries({ queryKey: ['notifs'] }); qc.invalidateQueries({ queryKey: ['notifs', 'preview'] }); qc.invalidateQueries({ queryKey: ['unread'] }); };
   if (isLoading) return <Container className="py-4"><Spinner animation="border" aria-label="Loading notifications" /></Container>;
   const items = data ?? [];
-  if (!items.length) return <Container className="py-4"><EmptyState icon={<Bell size={32} className="mx-auto mb-2 text-secondary" />} title="You're all caught up" desc="No notifications right now." /></Container>;
-  return (<Container fluid><PageHeader title="Notifications" desc="Real-time updates from tickets and SLA." actions={<Button size="sm" variant="outline-secondary" onClick={async () => { await import('../../api/helpdeskApi').then((m) => m.notificationApi.markAllRead()); qc.invalidateQueries({ queryKey: ['notifs'] }); qc.invalidateQueries({ queryKey: ['unread'] }); }}>Mark all as read</Button>} />{items.map((n) => (
-    <Card key={n.id} className="mb-2 p-3" style={!n.isRead ? { background: 'var(--surface-secondary)' } : undefined}>
-      <div className="d-flex gap-2 align-items-start"><span aria-hidden>{!n.isRead ? '● ' : ''}</span><div><strong>{n.title}</strong><div className="text-secondary small">{n.message} · {new Date(n.createdAt).toLocaleString()}</div></div>
-        {!n.isRead && <Button size="sm" variant="link" className="ms-auto" onClick={async () => { await import('../../api/helpdeskApi').then((m) => m.notificationApi.markRead(n.id)); qc.invalidateQueries({ queryKey: ['notifs'] }); qc.invalidateQueries({ queryKey: ['unread'] }); }}>Mark read</Button>}</div>
-    </Card>))}</Container>);
+  const count = unread?.count ?? items.filter((n) => !n.isRead).length;
+  return (
+    <Container fluid>
+      <PageHeader title="Notifications" desc="Real-time updates from tickets and SLA." actions={<Button size="sm" variant="outline-secondary" onClick={markAll}>Mark all as read</Button>} />
+      <Card className="p-3 mb-3 health-card">
+        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div><strong>{count > 0 ? `${count} unread update${count === 1 ? '' : 's'}` : 'All caught up'}</strong><br /><small style={{ opacity: 0.75 }}>Realtime sync is on.</small></div>
+          <span className="live-pill live"><span className="live-dot" /> Live</span>
+        </div>
+      </Card>
+      {items.length === 0
+        ? <EmptyState icon={<Bell size={32} className="mx-auto mb-2 text-secondary" />} title="You're all caught up" desc="No notifications right now." />
+        : items.map((n) => (
+          <Card key={n.id} className="mb-2 p-3" style={!n.isRead ? { background: 'var(--surface-secondary)' } : undefined}>
+            <div className="d-flex gap-2 align-items-start"><span aria-hidden>{!n.isRead ? '● ' : ''}</span><div><strong>{n.title}</strong><div className="text-secondary small">{n.message} · {new Date(n.createdAt).toLocaleString()}</div></div>
+              {!n.isRead && <Button size="sm" variant="link" className="ms-auto" onClick={async () => { await import('../../api/helpdeskApi').then((m) => m.notificationApi.markRead(n.id)); qc.invalidateQueries({ queryKey: ['notifs'] }); qc.invalidateQueries({ queryKey: ['notifs', 'preview'] }); qc.invalidateQueries({ queryKey: ['unread'] }); }}>Mark read</Button>}</div>
+          </Card>))}
+    </Container>
+  );
 }
