@@ -52,6 +52,14 @@ export const attachmentApi = {
     return api.post(`/api/tickets/${ticketId}/attachments`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
   },
   downloadUrl: (ticketId: string, id: string) => `/api/tickets/${ticketId}/attachments/${id}/download`,
+  download: async (ticketId: string, id: string, fileName: string) => {
+    const res = await api.get(`/api/tickets/${ticketId}/attachments/${id}/download`, { responseType: 'blob' });
+    const url = URL.createObjectURL(res.data);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  },
 };
 export const slaApi = {
   list: () => api.get<SlaPolicy[]>('/api/sla-policies'),

@@ -242,7 +242,7 @@ export function TicketDetailPage({ id }: { id: string }) {
           </Card>
           {(attachments ?? []).length > 0 && (
             <Card className="p-2 mt-2"><h6>Attachments</h6>{(attachments ?? []).map((a: { id: string; fileName: string; fileSize: number }) => (
-              <div key={a.id} className="d-flex justify-content-between align-items-center small"><span>📎 {a.fileName} ({Math.round(a.fileSize / 1024)} KB)</span><a href={attachmentApi.downloadUrl(id, a.id)}>Download</a></div>))}</Card>
+              <div key={a.id} className="d-flex justify-content-between align-items-center small"><span>📎 {a.fileName} ({Math.round(a.fileSize / 1024)} KB)</span><Button size="sm" variant="link" onClick={() => attachmentApi.download(id, a.id, a.fileName)}>Download</Button></div>))}</Card>
           )}
           {ticket && (ticket.status === 'Resolved' || ticket.status === 'Closed') && (
             <Card className="p-3 mt-3 text-center"><h6>How satisfied are you?</h6>
