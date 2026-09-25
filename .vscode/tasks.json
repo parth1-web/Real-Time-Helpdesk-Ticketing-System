@@ -1,0 +1,83 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "backend",
+      "detail": "ASP.NET Core API on http://localhost:5000 (serves /api, /hubs, /swagger in Development)",
+      "type": "shell",
+      "command": "dotnet run --project src/Helpdesk.API --urls http://localhost:5000",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always", "panel": "dedicated", "group": "backend" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": "$msCompile",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*Building.*|.*Restore.*",
+          "endsPattern": ".*Now listening on.*|.*Application started.*"
+        }
+      }
+    },
+    {
+      "label": "frontend: install",
+      "detail": "npm install (first time only)",
+      "type": "shell",
+      "command": "npm install",
+      "options": { "cwd": "${workspaceFolder}/frontend/helpdesk-web" },
+      "presentation": { "reveal": "silent", "panel": "shared" }
+    },
+    {
+      "label": "frontend: build",
+      "detail": "Vite build -> src/Helpdesk.API/wwwroot (for integrated single-port mode)",
+      "type": "shell",
+      "command": "npm run build",
+      "options": { "cwd": "${workspaceFolder}/frontend/helpdesk-web" },
+      "presentation": { "reveal": "silent", "panel": "shared" },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "frontend: dev",
+      "detail": "Vite dev on http://localhost:5173 (proxies /api + /hubs to :5000)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/frontend/helpdesk-web" },
+      "presentation": { "reveal": "always", "panel": "dedicated", "group": "frontend" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": ".*Local:.*http.*|.*ready in.*"
+        }
+      }
+    },
+    {
+      "label": "fullstack: integrated",
+      "detail": "ONE URL: builds UI into wwwroot then serves everything on http://localhost:5000",
+      "type": "shell",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ${workspaceFolder}/run-fullstack.ps1",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "fullstack",
+        "pattern": "$msCompile",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*Building frontend.*",
+          "endsPattern": ".*Now listening on.*|.*Application started.*"
+        }
+      }
+    },
+    {
+      "label": "fullstack: dev (backend + frontend)",
+      "detail": "TWO URLs at once: API :5000 + Vite :5173 (recommended for development)",
+      "dependsOn": ["backend", "frontend: dev"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    }
+  ]
+}
