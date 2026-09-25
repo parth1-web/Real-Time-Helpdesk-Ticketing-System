@@ -1,0 +1,18 @@
+/* Responsive + content-width system (Bootstrap grid stays authoritative) */
+.app-main { max-width: var(--content-max); margin: 0 auto; width: 100%; }
+.form-narrow { max-width: var(--form-max); }
+.readable { max-width: 900px; }
+.table thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+@media (max-width: 991px) {
+  .sidebar { display: none; }
+  .desktop-table { display: none; }
+  .page-header-actions .btn { padding: 0.375rem 0.6rem; }
+}
+@media (min-width: 992px) {
+  .mobile-cards { display: none !important; }
+  .mobile-offcanvas-btn { display: none !important; }
+}
+@media (max-width: 575px) {
+  .stat-grid > [class*="col-"] { margin-bottom: 0.5rem; }
+  .composer-actions .btn { flex: 1 1 auto; }
+}

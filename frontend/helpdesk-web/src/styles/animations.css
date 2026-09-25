@@ -1,0 +1,15 @@
+/* Micro-interactions: 150–250ms, no layout-blocking animation */
+.interactive-card, .ticket-card, .metric-card { transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+.interactive-card:hover, .ticket-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn, .nav-link, .dropdown-item { transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+.msg-enter { animation: msg-in 220ms ease; }
+@keyframes msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.msg-flash { animation: msg-flash 1.6s ease; }
+@keyframes msg-flash { 0% { box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.45); } 100% { box-shadow: none; } }
+.toast { animation: msg-in 200ms ease; }
+.modal.fade .modal-dialog { transition: transform 0.2s ease; }
+.skeleton { background: linear-gradient(90deg, var(--border) 25%, var(--surface-secondary, var(--surface)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: var(--radius-sm); }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
