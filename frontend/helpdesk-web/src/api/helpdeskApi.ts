@@ -24,10 +24,14 @@ export const organizationApi = { list: () => api.get('/api/organizations') };
 export const departmentApi = {
   list: () => api.get<Department[]>('/api/departments'),
   create: (p: Partial<Department>) => api.post('/api/departments', p),
+  update: (id: string, p: Partial<Department>) => api.put(`/api/departments/${id}`, p),
+  remove: (id: string) => api.delete(`/api/departments/${id}`),
 };
 export const categoryApi = {
   list: () => api.get<TicketCategory[]>('/api/categories'),
   create: (p: Partial<TicketCategory>) => api.post('/api/categories', p),
+  update: (id: string, p: Partial<TicketCategory>) => api.put(`/api/categories/${id}`, p),
+  remove: (id: string) => api.delete(`/api/categories/${id}`),
 };
 export const notificationApi = {
   list: () => api.get<NotificationItem[]>('/api/notifications'),

@@ -8,7 +8,7 @@ import { ProtectedRoute, RoleRoute } from './routes/guards';
 import { LoginPage, RegisterPage } from './pages/auth/AuthPages';
 import { CustomerDashboard, TicketListPage, TicketNewPage, TicketDetailPage } from './pages/customer/CustomerPages';
 import { AgentDashboard, TicketQueuePage, NotificationsPage } from './pages/agent/AgentPages';
-import { AdminDashboard, AdminLists } from './pages/admin/AdminPages';
+import { AdminDashboard, AdminLists, SlaPage } from './pages/admin/AdminPages';
 
 const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 15000 } } });
 
@@ -65,7 +65,7 @@ export default function App() {
               <Route path="/admin/agents" element={<Shell title="Agents"><AdminLists kind="agents" /></Shell>} />
               <Route path="/admin/departments" element={<Shell title="Departments"><AdminLists kind="departments" /></Shell>} />
               <Route path="/admin/categories" element={<Shell title="Categories"><AdminLists kind="categories" /></Shell>} />
-              <Route path="/admin/sla" element={<Shell title="SLA"><AdminLists kind="categories" /></Shell>} />
+              <Route path="/admin/sla" element={<Shell title="SLA"><SlaPage /></Shell>} />
               <Route path="/admin/reports" element={<Shell title="Reports"><AdminDashboard /></Shell>} />
               <Route path="/admin/activity" element={<Shell title="Activity"><Container fluid>Activity timeline from /api reports.</Container></Shell>} />
               <Route path="*" element={<NotFound />} />
