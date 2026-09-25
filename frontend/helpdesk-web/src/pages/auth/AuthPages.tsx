@@ -29,8 +29,8 @@ function useBackendStatus() {
       const c = new AbortController();
       const t = setTimeout(() => c.abort(), 4000);
       try {
-        await fetch('/api/auth/me', { signal: c.signal });
-        if (!stop) setLive('live'); // any HTTP response (even 401) proves the API is up
+        const response = await fetch('/api/health', { signal: c.signal, cache: 'no-store' });
+        if (!stop) setLive(response.ok ? 'live' : 'down');
       } catch { if (!stop) setLive('down'); }
       finally { clearTimeout(t); }
     };
