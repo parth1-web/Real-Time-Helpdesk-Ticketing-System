@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { Card, Form, Button, Alert } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { LifeBuoy, Zap, ShieldCheck, BarChart3, Eye, EyeOff } from 'lucide-react';
+import { LifeBuoy, Zap, ShieldCheck, BarChart3, Eye, EyeOff, Mail, Lock, User, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { authApi } from '../../api/helpdeskApi';
 import { useAuthStore } from '../../store/useAuthStore';
 import { getToken } from '../../store/session';
+import * as React from 'react';
 
 const loginSchema = z.object({ email: z.string().email('Please enter a valid email address.'), password: z.string().min(1, 'Password is required.'), remember: z.boolean().optional() });
 const registerSchema = z.object({
@@ -50,21 +51,126 @@ function StatusPill({ status }: { status: 'checking' | 'live' | 'down' }) {
   return <span className="live-pill connecting" role="status">○ Connecting…</span>;
 }
 
+function AnimatedIcon({ icon: Icon, delay = 0, className = '' }: { icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>; delay?: number; className?: string }) {
+  return (
+    <div className={`auth-feature-icon-wrapper ${className}`} style={{ animationDelay: `${delay}ms` }}>
+      <Icon width={24} height={24} />
+    </div>
+  );
+}
+
+function FeatureItem({ icon: Icon, title, description, delay = 0 }: { icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>; title: string; description: string; delay?: number }) {
+  return (
+    <div className="auth-feat" style={{ animationDelay: `${delay}ms` }}>
+      <AnimatedIcon icon={Icon} delay={delay} />
+      <div>
+        <strong>{title}</strong>
+        <span>{description}</span>
+      </div>
+    </div>
+  );
+}
+
+function StatItem({ label, value, delay = 0 }: { label: string; value: string | number; delay?: number }) {
+  return (
+    <div className="auth-stat" style={{ animationDelay: `${delay}ms` }}>
+      <b>{value}</b>
+      <small>{label}</small>
+    </div>
+  );
+}
+
 function Showcase() {
   return (
     <div className="auth-show">
-      <div className="auth-brand"><span className="brand-badge"><LifeBuoy size={20} /></span> HelpDesk</div>
-      <h1>Support that feels instant.</h1>
+      <div className="auth-brand"><span className="brand-badge"><LifeBuoy width={20} height={20} /></span> HelpDesk</div>
+      <h1>Support that feels <span className="text-primary">instant</span>.</h1>
       <p className="mb-0" style={{ opacity: 0.85 }}>Realtime conversations, SLA tracking and analytics — one workspace for customers, agents and admins.</p>
       <div className="auth-feats">
-        <div className="auth-feat"><Zap size={17} /><span><strong>Realtime tickets.</strong> Messages, assignment and status sync live.</span></div>
-        <div className="auth-feat"><ShieldCheck size={17} /><span><strong>SLA you can trust.</strong> At-risk and breach alerts, enforced server-side.</span></div>
-        <div className="auth-feat"><BarChart3 size={17} /><span><strong>Command-center analytics.</strong> Volume, SLA compliance, CSAT.</span></div>
+        <FeatureItem icon={Zap} title="Realtime tickets." description="Messages, assignment and status sync live." delay={100} />
+        <FeatureItem icon={ShieldCheck} title="SLA you can trust." description="At-risk and breach alerts, enforced server-side." delay={200} />
+        <FeatureItem icon={BarChart3} title="Command-center analytics." description="Volume, SLA compliance, CSAT." delay={300} />
       </div>
       <div className="auth-stats">
-        <div className="auth-stat"><b>Live</b><small>SignalR sync</small></div>
-        <div className="auth-stat"><b>5</b><small>Role workspaces</small></div>
-        <div className="auth-stat"><b>24/7</b><small>SLA monitor</small></div>
+        <StatItem label="SignalR sync" value="Live" delay={100} />
+        <StatItem label="Role workspaces" value="5" delay={200} />
+        <StatItem label="SLA monitor" value="24/7" delay={300} />
+      </div>
+    </div>
+  );
+}
+
+function InputWithIcon({ icon: Icon, children, className = '', ...props }: { icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>; children: React.ReactNode; className?: string; [key: string]: any }) {
+  return (
+    <div className={`input-with-icon ${className}`}>
+      <span className="input-icon"><Icon width={18} height={18} /></span>
+      {React.cloneElement(children as React.ReactElement, { ...props })}
+    </div>
+  );
+}
+
+function PasswordField({ register, errors, show, setShow, name, label, placeholder, autoComplete, icon: Icon }: { register: any; errors: any; show: boolean; setShow: (show: boolean) => void; name: string; label: string; placeholder: string; autoComplete: string; icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>> }) {
+  return (
+    <Form.Group className="mb-2" as={Fragment}>
+      <Form.Label>{label}</Form.Label>
+      <div className="pw-wrap input-with-icon">
+<span className="input-icon"><Icon width={18} height={18} /></span>
+        <Form.Control
+          type={show ? 'text' : 'password'}
+          {...register(name)}
+          isInvalid={!!errors[name]}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+        />
+        <button
+          type="button"
+          className="pw-toggle"
+          onClick={() => setShow(!show)}
+          aria-label={show ? 'Hide password' : 'Show password'}
+        >
+          {show ? <EyeOff width={16} height={16} /> : <Eye width={16} height={16} />}
+        </button>
+        <Form.Control.Feedback type="invalid">{errors[name]?.message}</Form.Control.Feedback>
+      </div>
+    </Form.Group>
+  );
+}
+
+function FormField({ register, errors, name, label, placeholder, type = 'text', icon: Icon, autoComplete, children, ...props }: { register: any; errors: any; name: string; label: string; placeholder: string; type?: string; icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>; autoComplete: string; children?: React.ReactNode; [key: string]: any }) {
+  return (
+    <Form.Group className="mb-2" as={Fragment}>
+      <Form.Label>{label}</Form.Label>
+      <InputWithIcon icon={Icon} className={errors[name] ? 'has-error' : ''}>
+        <Form.Control
+          {...register(name)}
+          type={type}
+          isInvalid={!!errors[name]}
+          aria-invalid={!!errors[name]}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          {...props}
+        />
+        <Form.Control.Feedback type="invalid">{errors[name]?.message}</Form.Control.Feedback>
+      </InputWithIcon>
+      {children}
+    </Form.Group>
+  );
+}
+
+function AuthLayout({ children, title, subtitle, backend, actions }: { children: React.ReactNode; title: string; subtitle: string; backend: 'checking' | 'live' | 'down'; actions?: React.ReactNode }) {
+  return (
+    <div className="auth-wrap">
+      <Showcase />
+      <div className="auth-form-side">
+        <Card className="p-4 auth-card">
+          <div className="d-flex justify-content-between align-items-center mb-1">
+            <h2 className="mb-0">{title}</h2>
+            <StatusPill status={backend} />
+          </div>
+          <p className="text-secondary">{subtitle}</p>
+          {children}
+          {actions}
+        </Card>
       </div>
     </div>
   );
@@ -75,6 +181,7 @@ export function LoginPage() {
   const { setSession } = useAuthStore();
   const [err, setErr] = useState('');
   const [show, setShow] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const backend = useBackendStatus();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<z.infer<typeof loginSchema>>({ resolver: zodResolver(loginSchema), defaultValues: { remember: true } });
   if (getToken()) return <Navigate to="/dashboard" replace />;
@@ -82,29 +189,68 @@ export function LoginPage() {
     <div className="auth-wrap">
       <Showcase />
       <div className="auth-form-side">
-        <Card className="p-4 auth-card">
-          <div className="d-flex justify-content-between align-items-center mb-1"><h2 className="mb-0">Welcome back</h2><StatusPill status={backend} /></div>
-          <p className="text-secondary">Sign in to your support workspace.</p>
-          {err && <Alert variant="danger" role="alert">{err}</Alert>}
+        <AuthLayout
+          title="Welcome back"
+          subtitle="Sign in to your support workspace."
+          backend={backend}
+          actions={
+            <p className="mt-3 mb-0 text-secondary small">Protected by role-based access · JWT rotation</p>
+          }
+        >
+          {err && <Alert variant="danger" role="alert" className="mb-3">{err}</Alert>}
           <Form onSubmit={handleSubmit(async (v) => {
             setErr('');
+            setFieldErrors({});
             try {
               const { data } = await authApi.login(v.email, v.password);
               const me = await authApi.me().catch(() => null);
               setSession(data.accessToken, data.refreshToken, { id: data.userId, email: data.email, fullName: data.fullName, role: me?.data?.role ?? 'Customer' }, v.remember ?? true);
               nav('/dashboard');
-            } catch { setErr('Invalid email or password.'); }
+            } catch (e: any) {
+              const msg = e?.response?.data?.error || e?.message || 'Invalid email or password.';
+              if (msg.includes('email')) setFieldErrors({ email: msg });
+              else if (msg.includes('password')) setFieldErrors({ password: msg });
+              else setErr(msg);
+            }
           })}>
-            <Form.Group className="mb-2"><Form.Label>Email</Form.Label><Form.Control {...register('email')} isInvalid={!!errors.email} aria-invalid={!!errors.email} autoComplete="email" placeholder="you@example.com" /><Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback></Form.Group>
-            <Form.Group className="mb-2"><Form.Label>Password</Form.Label>
-              <div className="pw-wrap"><Form.Control type={show ? 'text' : 'password'} {...register('password')} isInvalid={!!errors.password} autoComplete="current-password" placeholder="••••••••" /><button type="button" className="pw-toggle" onClick={() => setShow(!show)} aria-label={show ? 'Hide password' : 'Show password'}>{show ? <EyeOff size={16} /> : <Eye size={16} />}</button></div>
-              <Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback></Form.Group>
-            <div className="d-flex justify-content-between align-items-center mb-3"><Form.Check type="checkbox" label="Remember me" {...register('remember')} aria-label="Remember me" /><Link to="/register" className="small">Need an account?</Link></div>
-            <Button className="w-100" type="submit" disabled={isSubmitting || backend === 'down'}>{isSubmitting ? 'Signing in…' : 'Sign in →'}</Button>
+            <FormField
+              register={register}
+              errors={errors}
+              name="email"
+              label="Email"
+              placeholder="you@example.com"
+              icon={Mail}
+              autoComplete="email"
+              error={fieldErrors.email}
+            />
+            <PasswordField
+              register={register}
+              errors={errors}
+              show={show}
+              setShow={setShow}
+              name="password"
+              label="Password"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              icon={Lock}
+            />
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <Form.Check type="checkbox" label="Remember me" {...register('remember')} aria-label="Remember me" />
+              <Link to="/register" className="small">Need an account?</Link>
+            </div>
+            <Button className="w-100" type="submit" disabled={isSubmitting || backend === 'down'}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 width={16} height={16} className="me-2 spin" /> Signing in…
+                </>
+              ) : (
+                'Sign in →'
+              )}
+            </Button>
             {backend === 'down' && <Alert variant="warning" className="mt-2 py-2 small">Backend unreachable — start the API on :5000, then retry.</Alert>}
           </Form>
           <p className="mt-3 mb-0 text-secondary small">Protected by role-based access · JWT rotation</p>
-        </Card>
+        </AuthLayout>
       </div>
     </div>
   );
@@ -123,31 +269,99 @@ export function RegisterPage() {
     <div className="auth-wrap">
       <Showcase />
       <div className="auth-form-side">
-        <Card className="p-4 auth-card">
-          <div className="d-flex justify-content-between align-items-center mb-1"><h2 className="mb-0">Create account</h2><StatusPill status={backend} /></div>
-          <p className="text-secondary">Join your support workspace in seconds.</p>
-          {err && <Alert variant="danger" role="alert">{err}</Alert>}
+        <AuthLayout
+          title="Create account"
+          subtitle="Join your support workspace in seconds."
+          backend={backend}
+          actions={
+            <p className="mt-3 mb-0">Have an account? <Link to="/login">Sign in</Link></p>
+          }
+        >
+          {err && <Alert variant="danger" role="alert" className="mb-3">{err}</Alert>}
           <Form onSubmit={handleSubmit(async (v) => {
             setErr('');
             try { await authApi.register({ firstName: v.firstName, lastName: v.lastName, email: v.email, password: v.password, organizationSlug: v.organizationSlug || undefined }); nav('/login'); }
             catch { setErr('Registration failed. Email may already exist.'); }
           })}>
             <div className="row">
-              <div className="col-6"><Form.Group className="mb-2"><Form.Label>First name</Form.Label><Form.Control {...register('firstName')} isInvalid={!!errors.firstName} autoComplete="given-name" /><Form.Control.Feedback type="invalid">{errors.firstName?.message}</Form.Control.Feedback></Form.Group></div>
-              <div className="col-6"><Form.Group className="mb-2"><Form.Label>Last name</Form.Label><Form.Control {...register('lastName')} isInvalid={!!errors.lastName} autoComplete="family-name" /><Form.Control.Feedback type="invalid">{errors.lastName?.message}</Form.Control.Feedback></Form.Group></div>
+              <div className="col-6">
+                <FormField
+                  register={register}
+                  errors={errors}
+                  name="firstName"
+                  label="First name"
+                  placeholder="John"
+                  icon={User}
+                  autoComplete="given-name"
+                />
+              </div>
+              <div className="col-6">
+                <FormField
+                  register={register}
+                  errors={errors}
+                  name="lastName"
+                  label="Last name"
+                  placeholder="Doe"
+                  icon={User}
+                  autoComplete="family-name"
+                />
+              </div>
             </div>
-            <Form.Group className="mb-2"><Form.Label>Email</Form.Label><Form.Control {...register('email')} isInvalid={!!errors.email} autoComplete="email" placeholder="you@example.com" /><Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback></Form.Group>
-            <Form.Group className="mb-2"><Form.Label>Organization slug <span className="text-secondary">(optional)</span></Form.Label><Form.Control {...register('organizationSlug')} isInvalid={!!errors.organizationSlug} placeholder="acme" aria-describedby="org-help" /><Form.Control.Feedback type="invalid">{errors.organizationSlug?.message}</Form.Control.Feedback><Form.Text id="org-help">Join an existing workspace, or leave blank.</Form.Text></Form.Group>
-            <Form.Group className="mb-2"><Form.Label>Password</Form.Label>
-              <div className="pw-wrap"><Form.Control type={show ? 'text' : 'password'} {...register('password')} isInvalid={!!errors.password} autoComplete="new-password" placeholder="8+ chars, upper + number" /><button type="button" className="pw-toggle" onClick={() => setShow(!show)} aria-label={show ? 'Hide password' : 'Show password'}>{show ? <EyeOff size={16} /> : <Eye size={16} />}</button></div>
-              <Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback>
+            <FormField
+              register={register}
+              errors={errors}
+              name="email"
+              label="Email"
+              placeholder="you@example.com"
+              icon={Mail}
+              autoComplete="email"
+            />
+            <FormField
+              register={register}
+              errors={errors}
+              name="organizationSlug"
+              label="Organization slug <span className='text-secondary'>(optional)</span>"
+              placeholder="acme"
+              icon={ShieldCheck}
+              autoComplete="off"
+            >
+              <Form.Text id="org-help">Join an existing workspace, or leave blank.</Form.Text>
+            </FormField>
+            <FormField
+              register={register}
+              errors={errors}
+              name="password"
+              label="Password"
+              placeholder="8+ chars, upper + number"
+              type="password"
+              icon={Lock}
+              autoComplete="new-password"
+            >
               <div className="strength" aria-hidden>{[0, 1, 2, 3].map((i) => <i key={i} className={i < score ? 'on' : ''} />)}</div>
-              <small className="text-secondary" role="status">{score <= 2 ? 'Weak' : score === 3 ? 'Good' : 'Strong'} password</small></Form.Group>
-            <Form.Group className="mb-3"><Form.Label>Confirm password</Form.Label><Form.Control type="password" {...register('confirm')} isInvalid={!!errors.confirm} autoComplete="new-password" /><Form.Control.Feedback type="invalid">{errors.confirm?.message}</Form.Control.Feedback></Form.Group>
-            <Button className="w-100" type="submit" disabled={isSubmitting || backend === 'down'}>{isSubmitting ? 'Creating…' : 'Create account →'}</Button>
+              <small className="text-secondary" role="status">{score <= 2 ? 'Weak' : score === 3 ? 'Good' : 'Strong'} password</small>
+            </FormField>
+            <FormField
+              register={register}
+              errors={errors}
+              name="confirm"
+              label="Confirm password"
+              placeholder="••••••••"
+              type="password"
+              icon={Lock}
+              autoComplete="new-password"
+            />
+            <Button className="w-100 mt-2" type="submit" disabled={isSubmitting || backend === 'down'}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 width={16} height={16} className="me-2 spin" /> Creating…
+                </>
+              ) : (
+                'Create account →'
+              )}
+            </Button>
           </Form>
           <p className="mt-3 mb-0">Have an account? <Link to="/login">Sign in</Link></p>
-        </Card>
+        </AuthLayout>
       </div>
     </div>
   );
