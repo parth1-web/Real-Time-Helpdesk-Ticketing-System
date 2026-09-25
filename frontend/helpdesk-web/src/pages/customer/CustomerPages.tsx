@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { ticketApi, categoryApi, departmentApi, messageApi, feedbackApi } from '../../api/helpdeskApi';
-import { PageHeader, EmptyState, ErrorState, SkeletonCards, StatusBadge, PriorityBadge, SlaBadge, UserAvatar } from '../../components/common/ui';
+import { Ticket as TicketIcon, Clock, CheckCircle2, Inbox, ArrowRight, Headset } from 'lucide-react';
+import { PageHeader, EmptyState, ErrorState, SkeletonCards, SkeletonTable, StatusBadge, PriorityBadge, SlaBadge, UserAvatar, StatCard } from '../../components/common/ui';
 import { useAuthStore } from '../../store/useAuthStore';
 import { createTicketConnection } from '../../api/signalr';
 import { useEffect } from 'react';
@@ -18,15 +19,23 @@ export function CustomerDashboard() {
   if (isError) return <ErrorState message="We couldn't load your tickets." onRetry={() => refetch()} />;
   return (
     <div>
-      <PageHeader title={`Good morning, ${user?.fullName ?? 'there'} 👋`} desc="How can we help you today?" actions={<Link to="/tickets/new" className="btn btn-primary"><Plus size={15} /> Create New Ticket</Link>} />
-      <Row className="g-3 mb-3">
-        {[['Open Tickets', open], ['Total Tickets', data?.total ?? 0], ['Resolved', items.filter((t) => t.status === 'Resolved').length], ['Waiting', items.filter((t) => t.status === 'WaitingForCustomer').length]].map(([l, v]) => (
-          <Col key={l as string} xs={12} sm={6} lg={3}><Card className="p-3 metric-card"><div className="fs-3 fw-bold">{v as number}</div><div className="text-secondary">{l as string}</div></Card></Col>
-        ))}
+      <PageHeader title={`Good morning, ${user?.fullName ?? 'there'} 👋`} desc="We're here to help." actions={<Link to="/tickets/new" className="btn btn-primary"><Plus size={15} /> Create New Ticket</Link>} />
+      <Row className="g-3 mb-3 stat-grid">
+        <Col xs={12} sm={6} lg={3}><StatCard icon={<TicketIcon size={18} className="text-secondary" />} label="Open Tickets" value={open} trend="Needs attention first" /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard icon={<Clock size={18} className="text-secondary" />} label="Waiting for Reply" value={items.filter((t) => t.status === 'WaitingForCustomer').length} /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard icon={<CheckCircle2 size={18} className="text-secondary" />} label="Resolved" value={items.filter((t) => t.status === 'Resolved').length} /></Col>
+        <Col xs={12} sm={6} lg={3}><StatCard icon={<Inbox size={18} className="text-secondary" />} label="Total Tickets" value={data?.total ?? 0} /></Col>
       </Row>
+      <h6 className="mt-1 mb-2">Recent Tickets</h6>
       {items.length === 0
         ? <EmptyState title="No support tickets yet." desc="Need help with something?" action={<Link to="/tickets/new" className="btn btn-primary">Create Your First Ticket</Link>} />
-        : <Card className="p-0 overflow-hidden"><Table hover responsive className="mb-0"><thead><tr><th>Ticket</th><th>Subject</th><th>Status</th><th>Priority</th><th>Updated</th></tr></thead><tbody>{items.slice(0, 8).map((t) => (<tr key={t.id}><td><Link to={`/tickets/${t.id}`}>{t.ticketNumber}</Link></td><td>{t.subject}</td><td><StatusBadge s={t.status} /></td><td><PriorityBadge p={t.priority} /></td><td>{new Date(t.createdAt).toLocaleString()}</td></tr>))}</tbody></Table></Card>}
+        : <><Card className="p-0 overflow-hidden"><Table hover responsive className="mb-0"><thead><tr><th>Ticket</th><th>Subject</th><th>Status</th><th>Priority</th><th>Updated</th></tr></thead><tbody>{items.slice(0, 8).map((t) => (<tr key={t.id}><td><Link to={`/tickets/${t.id}`}>{t.ticketNumber}</Link></td><td>{t.subject}</td><td><StatusBadge s={t.status} /></td><td><PriorityBadge p={t.priority} /></td><td>{new Date(t.createdAt).toLocaleString()}</td></tr>))}</tbody></Table></Card>
+          <h6 className="mt-3 mb-2">Quick Actions</h6>
+          <Row className="g-3">
+            <Col xs={12} md={4}><Link to="/tickets/new" style={{ textDecoration: 'none' }}><Card className="p-3 interactive-card"><div className="fw-semibold">Create Ticket <ArrowRight size={14} /></div><small className="text-secondary">Get help from our support team.</small></Card></Link></Col>
+            <Col xs={12} md={4}><Link to="/tickets" style={{ textDecoration: 'none' }}><Card className="p-3 interactive-card"><div className="fw-semibold">View Tickets <ArrowRight size={14} /></div><small className="text-secondary">Track your existing requests.</small></Card></Link></Col>
+            <Col xs={12} md={4}><Card className="p-3"><div className="fw-semibold d-flex gap-2 align-items-center"><Headset size={15} /> Contact Support</div><small className="text-secondary">Need additional assistance?</small></Card></Col>
+          </Row></>}
     </div>
   );
 }
