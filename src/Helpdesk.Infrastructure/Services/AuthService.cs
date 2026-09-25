@@ -56,7 +56,7 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> RefreshAsync(string refreshToken, CancellationToken ct = default)
     {
         var hash = _jwt.HashToken(refreshToken);
-        var stored = await _db.RefreshTokens.Include(r => r.Id).FirstOrDefaultAsync(r => r.TokenHash == hash, ct)
+        var stored = await _db.RefreshTokens.FirstOrDefaultAsync(r => r.TokenHash == hash, ct)
             ?? throw new UnauthorizedAccessException("Invalid refresh token.");
         if (!stored.IsActive) throw new UnauthorizedAccessException("Refresh token expired.");
         var user = await _db.Users.FindAsync(new object[] { stored.UserId }, ct)
